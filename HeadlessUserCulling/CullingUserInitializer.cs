@@ -1,4 +1,5 @@
 using FrooxEngine;
+using FrooxEngine.CommonAvatar;
 using FrooxEngine.ProtoFlux;
 using ResoniteModLoader;
 
@@ -16,7 +17,7 @@ public partial class HeadlessUserCulling : ResoniteMod
                 Slot CullingRoot = user.World.RootSlot.GetChildrenWithTag("HeadlessCullingRoot").First();
                 Slot UserCullingSlot = CullingRoot.AddSlot(user.UserID, false);
                 UserCullingSlot.Tag = null;
-                Slot DynVarSlot = CullingRoot.AddSlot("DynVars", false);
+                Slot DynVarSlot = UserCullingSlot.AddSlot("DynVars", false);
 
                 // Sets up the culling behavior via UserDistanceValueDriver and VirtualParent
                 var PrimaryDistCheck = UserCullingSlot.AttachComponent<UserDistanceValueDriver<bool>>(true, null);
@@ -43,9 +44,35 @@ public partial class HeadlessUserCulling : ResoniteMod
 
                 // Sets up dyn vars to be adjustable by the user
                 Slot DistanceVarSlot = DynVarSlot.AddSlot("Distance", false);
-                DistanceVarSlot.AttachComponent<DynamicValueVariableDriver<float>>(true, null);
-                DistanceVarSlot.GetComponent<DynamicValueVariableDriver<float>>().VariableName.Value = "HeadlessAvatarCulling/CullingDistance";
-                DistanceVarSlot.GetComponent<DynamicValueVariableDriver<float>>().Target.Value = UserCullingSlot.GetComponent<UserDistanceValueDriver<bool>>().Distance.ReferenceID;
+
+                var PrimaryDistDriver = DistanceVarSlot.AttachComponent<DynamicValueVariableDriver<float>>(true, null);
+                PrimaryDistDriver.VariableName.Value = "HeadlessAvatarCulling/CullingDistance";
+                PrimaryDistDriver.Target.Value = PrimaryDistCheck.Distance.ReferenceID;
+
+                var SecondaryDistDriver = DistanceVarSlot.AttachComponent<DynamicValueVariableDriver<float>>(true, null);
+                SecondaryDistDriver.VariableName.Value = "HeadlessAvatarCulling/CullingDistance";
+                SecondaryDistDriver.Target.Value = SecondaryDistCheck.Distance.ReferenceID;
+
+                // Recreates the Audio Output on the user
+                // to keep audio working while a user is culled
+                var UserVoice = user.Root.Slot.GetComponent<AvatarVoiceInfo>().AudioSource.Value;
+
+                Slot AudioSlot = UserCullingSlot.AddSlot("Audio", false);
+
+                var AudioOutput = AudioSlot.AttachComponent<AudioOutput>(true, null);
+                AudioOutput.Source.Value = UserVoice;
+                AudioOutput.Priority.Value = 0;
+                AudioOutput.AudioTypeGroup.Value = AudioTypeGroup.Voice;
+
+                var AudioManager = AudioSlot.AttachComponent<AvatarAudioOutputManager>(true, null);
+                AudioManager.AudioOutput.Value = AudioOutput.ReferenceID;
+                AudioManager.OnEquip(user.Root.Slot.GetComponentInChildren<AvatarObjectSlot>());
+                SecondaryDistCheck.TargetField.Value = AudioSlot.ActiveSelf_Field.ReferenceID;
+
+                // This is needed because otherwise, the min scale will
+                // be set to Infinity, making the audio output not work
+                AudioOutput.MinScale.ActiveLink.ReleaseLink(true);
+                AudioOutput.MinScale.Value = 1F;
             }
         }, false, null, false);
     }
