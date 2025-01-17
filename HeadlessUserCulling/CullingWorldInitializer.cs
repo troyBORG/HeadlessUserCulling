@@ -24,19 +24,19 @@ public partial class HeadlessUserCulling : ResoniteMod
                 CullingRoot.AttachComponent<SearchBlock>(true, null);
 
                 // Setup DynamicVariableSpace to allow for user configuration
-                CullingRoot.AttachComponent<DynamicVariableSpace>(true, null);
-                CullingRoot.GetComponent<DynamicVariableSpace>().SpaceName.Value = "HeadlessAvatarCulling";
+                var DynVarSpace = CullingRoot.AttachComponent<DynamicVariableSpace>(true, null);
+                DynVarSpace.SpaceName.Value = "HeadlessAvatarCulling";
 
                 // Setup Distance variable
                 Slot DistanceVarSlot = DynVarSlot.AddSlot("Distance", false);
 
-                DistanceVarSlot.AttachComponent<DynamicValueVariable<float>>(true, null);
-                DistanceVarSlot.GetComponent<DynamicValueVariable<float>>().VariableName.Value = "HeadlessAvatarCulling/CullingDistance";
+                var DistanceDynVar = DistanceVarSlot.AttachComponent<DynamicValueVariable<float>>(true, null);
+                DistanceDynVar.VariableName.Value = "HeadlessAvatarCulling/CullingDistance";
 
-                DistanceVarSlot.AttachComponent<ValueUserOverride<float>>(true, null);
-                DistanceVarSlot.GetComponent<ValueUserOverride<float>>().Default.Value = 10;
-                DistanceVarSlot.GetComponent<ValueUserOverride<float>>().CreateOverrideOnWrite.Value = true;
-                DistanceVarSlot.GetComponent<ValueUserOverride<float>>().Target.Value = DistanceVarSlot.GetComponent<DynamicValueVariable<float>>().Value.ReferenceID;
+                var DistanceOverride = DistanceVarSlot.AttachComponent<ValueUserOverride<float>>(true, null);
+                DistanceOverride.Default.Value = 10;
+                DistanceOverride.CreateOverrideOnWrite.Value = true;
+                DistanceOverride.Target.Value = DistanceDynVar.Value.ReferenceID;
 
                 // Sets up this world to set up users when they join
                 world.UserSpawn += InitializeUser;
