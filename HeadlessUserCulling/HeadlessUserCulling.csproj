@@ -15,20 +15,25 @@
   <ItemGroup>
     <Reference Include="ResoniteModLoader">
       <HintPath>$(ResonitePath)Libraries\ResoniteModLoader.dll</HintPath>
+      <Private>false</Private>
     </Reference>
     <Reference Include="0Harmony">
       <HintPath>$(ResonitePath)0Harmony.dll</HintPath>
       <HintPath Condition="Exists('$(ResonitePath)rml_libs\0Harmony.dll')">$(ResonitePath)rml_libs\0Harmony.dll</HintPath>
       <HintPath Condition="Exists('$(ResonitePath)Libraries\0Harmony.dll')">$(ResonitePath)Libraries\0Harmony.dll</HintPath>
+      <Private>false</Private>
     </Reference>
     <Reference Include="FrooxEngine">
       <HintPath>$(ResonitePath)FrooxEngine.dll</HintPath>
+      <Private>false</Private>
     </Reference>
     <Reference Include="Elements.Core">
       <HintPath>$(ResonitePath)Elements.Core.dll</HintPath>
+      <Private>false</Private>
     </Reference>
     <Reference Include="Elements.Assets">
       <HintPath>$(ResonitePath)Elements.Assets.dll</HintPath>
+      <Private>false</Private>
     </Reference>
   </ItemGroup>
 </Project>
