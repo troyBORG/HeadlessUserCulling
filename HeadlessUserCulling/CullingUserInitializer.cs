@@ -13,11 +13,12 @@ public partial class HeadlessUserCulling : ResoniteMod
         {
             if (user != user.World.HostUser)
             {
-                // Create and setup user specific culling slot
+                // Create and setup user specific culling slots
                 Slot CullingRoot = user.World.RootSlot.GetChildrenWithTag("HeadlessCullingRoot").First();
                 Slot UserCullingSlot = CullingRoot.AddSlot(user.UserID, false);
                 UserCullingSlot.Tag = null;
                 Slot DynVarSlot = UserCullingSlot.AddSlot("DynVars", false);
+                Slot HelpersSlot = UserCullingSlot.AddSlot("Helpers", false);
 
                 // Sets up the culling behavior via UserDistanceValueDriver and VirtualParent
                 var PrimaryDistCheck = UserCullingSlot.AttachComponent<UserDistanceValueDriver<bool>>(true, null);
@@ -48,6 +49,7 @@ public partial class HeadlessUserCulling : ResoniteMod
                 var PrimaryDistDriver = DistanceVarSlot.AttachComponent<DynamicValueVariableDriver<float>>(true, null);
                 PrimaryDistDriver.VariableName.Value = "HeadlessAvatarCulling/CullingDistance";
                 PrimaryDistDriver.Target.Value = PrimaryDistCheck.Distance.ReferenceID;
+                SecondaryDistCheck.TargetField.Value = HelpersSlot.ActiveSelf_Field.ReferenceID;
 
                 var SecondaryDistDriver = DistanceVarSlot.AttachComponent<DynamicValueVariableDriver<float>>(true, null);
                 SecondaryDistDriver.VariableName.Value = "HeadlessAvatarCulling/CullingDistance";
@@ -57,7 +59,7 @@ public partial class HeadlessUserCulling : ResoniteMod
                 // to keep audio working while a user is culled
                 var UserVoice = user.Root.Slot.GetComponent<AvatarVoiceInfo>().AudioSource.Value;
 
-                Slot AudioSlot = UserCullingSlot.AddSlot("Audio", false);
+                Slot AudioSlot = HelpersSlot.AddSlot("Audio", false);
 
                 var AudioOutput = AudioSlot.AttachComponent<AudioOutput>(true, null);
                 AudioOutput.Source.Value = UserVoice;
@@ -67,12 +69,15 @@ public partial class HeadlessUserCulling : ResoniteMod
                 var AudioManager = AudioSlot.AttachComponent<AvatarAudioOutputManager>(true, null);
                 AudioManager.AudioOutput.Value = AudioOutput.ReferenceID;
                 AudioManager.OnEquip(user.Root.Slot.GetComponentInChildren<AvatarObjectSlot>());
-                SecondaryDistCheck.TargetField.Value = AudioSlot.ActiveSelf_Field.ReferenceID;
 
                 // This is needed because otherwise, the min scale will
                 // be set to Infinity, making the audio output not work
                 AudioOutput.MinScale.ActiveLink.ReleaseLink(true);
                 AudioOutput.MinScale.Value = 1F;
+
+                // Generates visuals for culled user's head and hands
+                Slot VisualSlot = HelpersSlot.AddSlot("Visuals", false);
+                Slot HeadVisualSlot = VisualSlot.AddSlot
             }
         }, false, null, false);
     }
