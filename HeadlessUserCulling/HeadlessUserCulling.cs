@@ -24,7 +24,7 @@ public partial class HeadlessUserCulling : ResoniteMod
 
         Engine.Current.RunPostInit(() => 
         {
-            Engine.Current.WorldManager.WorldAdded += InitializeCulling;
+            Engine.Current.WorldManager.WorldAdded += InitializeWorld;
         });
     }
 }
