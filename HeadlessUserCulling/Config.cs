@@ -1,8 +1,8 @@
 using ResoniteModLoader;
 
-namespace HeadlessAvatarCulling;
+namespace HeadlessUserCulling;
 
-public partial class HeadlessAvatarCulling : ResoniteMod
+public partial class HeadlessUserCulling : ResoniteMod
 {
     [AutoRegisterConfigKey] public static readonly ModConfigurationKey<bool> Enable =
             new ModConfigurationKey<bool>(

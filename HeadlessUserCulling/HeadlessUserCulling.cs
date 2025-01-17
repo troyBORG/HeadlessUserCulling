@@ -5,11 +5,11 @@ using System.Reflection;
 using FrooxEngine;
 using Elements.Core;
 
-namespace HeadlessAvatarCulling;
+namespace HeadlessUserCulling;
 
-public partial class HeadlessAvatarCulling : ResoniteMod
+public partial class HeadlessUserCulling : ResoniteMod
 {
-    public override string Name => "HeadlessAvatarCulling";
+    public override string Name => "HeadlessUserCulling";
     public override string Author => "Raidriar796";
     public override string Version => "1.0.0";
     public override string Link => "";
@@ -17,7 +17,7 @@ public partial class HeadlessAvatarCulling : ResoniteMod
 
     public override void OnEngineInit()
     {
-        Harmony harmony = new("net.raidriar796.HeadlessAvatarCulling");
+        Harmony harmony = new("net.raidriar796.HeadlessUserCulling");
         Config = GetConfiguration();
         Config?.Save(true);
         harmony.PatchAll();
