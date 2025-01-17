@@ -21,5 +21,10 @@ public partial class HeadlessUserCulling : ResoniteMod
         Config = GetConfiguration();
         Config?.Save(true);
         harmony.PatchAll();
+
+        Engine.Current.RunPostInit(() => 
+        {
+            Engine.Current.WorldManager.WorldAdded += InitializeCulling;
+        });
     }
 }
