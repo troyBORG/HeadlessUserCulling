@@ -30,9 +30,9 @@ public partial class HeadlessUserCulling : ResoniteMod
                 SecondaryDistCheck.Node.Value = UserRoot.UserNode.View;
                 SecondaryDistCheck.FarValue.Value = true;
 
-                var VirtualParent = UserCullingSlot.AttachComponent<VirtualParent>(true, null);
-                VirtualParent.OverrideParent.Value = user.Root.HeadSlot.ReferenceID;
-                VirtualParent.SetVirtualChild(UserCullingSlot, false);
+                var PrimaryVirtualParent = UserCullingSlot.AttachComponent<VirtualParent>(true, null);
+                PrimaryVirtualParent.OverrideParent.Value = user.Root.HeadSlot.ReferenceID;
+                PrimaryVirtualParent.SetVirtualChild(UserCullingSlot, false);
 
                 // Workaround for odd behavior on user initial focus
                 // I intend to replace this eventually, but if I cannot
@@ -77,7 +77,23 @@ public partial class HeadlessUserCulling : ResoniteMod
 
                 // Generates visuals for culled user's head and hands
                 Slot VisualSlot = HelpersSlot.AddSlot("Visuals", false);
-                Slot HeadVisualSlot = VisualSlot.AddSlot
+
+                var DefaultMaterial = user.World.GetSharedComponentOrCreate("DefaultMaterial", delegate(PBS_Metallic mat) {}, 0, false, false, null);
+
+                Slot HeadVisualSlot = VisualSlot.AddSlot("HeadVisual", false);
+                HeadVisualSlot.AttachSphere(0.15F, DefaultMaterial, false);
+
+                Slot LeftHandVisualSlot = VisualSlot.AddSlot("LeftHandVisual", false);
+                LeftHandVisualSlot.AttachSphere(0.1F, DefaultMaterial, false);
+                var LeftHandVirtualParent = UserCullingSlot.AttachComponent<VirtualParent>(true, null);
+                LeftHandVirtualParent.OverrideParent.Value = user.Root.GetHandSlot(Chirality.Left, true).ReferenceID;
+                LeftHandVirtualParent.SetVirtualChild(LeftHandVisualSlot, false);
+
+                Slot RightHandVisualSlot = VisualSlot.AddSlot("RIghtHandVisual", false);
+                RightHandVisualSlot.AttachSphere(0.1F, DefaultMaterial, false);
+                var RightHandVirtualParent = UserCullingSlot.AttachComponent<VirtualParent>(true, null);
+                RightHandVirtualParent.OverrideParent.Value = user.Root.GetHandSlot(Chirality.Right, true).ReferenceID;
+                RightHandVirtualParent.SetVirtualChild(RightHandVisualSlot, false);
             }
         }, false, null, false);
     }
