@@ -1,3 +1,4 @@
+using Elements.Core;
 using FrooxEngine;
 using FrooxEngine.CommonAvatar;
 using ResoniteModLoader;
@@ -26,8 +27,14 @@ public partial class HeadlessUserCulling : ResoniteMod
                 // Sets up the culling behavior via UserDistanceValueDriver and VirtualParent
                 var PrimaryDistCheck = UserCullingSlot.AttachComponent<UserDistanceValueDriver<bool>>(true, null);
                 PrimaryDistCheck.Node.Value = UserRoot.UserNode.View;
-                PrimaryDistCheck.TargetField.Value = user.Root.Slot.ActiveSelf_Field.ReferenceID;
+                //PrimaryDistCheck.TargetField.Value = user.Root.Slot.ActiveSelf_Field.ReferenceID;
                 PrimaryDistCheck.NearValue.Value = true;
+                
+                // Nightmare workaround for user respawning not supplying the user root
+                // active field to the primary distance check
+                var RefProxy = UserCullingSlot.AttachComponent<ValueField<RefID>>(true, null);
+                PrimaryDistCheck.TargetField.DriveFrom(RefProxy.Value);
+                RefProxy.Value.Value = user.Root.Slot.ActiveSelf_Field.ReferenceID;
 
                 // Secondary distance check for enabling stuff while the user is culled
                 var SecondaryDistCheck = UserCullingSlot.AttachComponent<UserDistanceValueDriver<bool>>(true, null);
@@ -99,7 +106,7 @@ public partial class HeadlessUserCulling : ResoniteMod
                 LeftHandVirtualParent.OverrideParent.Value = user.Root.GetHandSlot(Chirality.Left, true).ReferenceID;
                 LeftHandVirtualParent.SetVirtualChild(LeftHandVisualSlot, false);
 
-                Slot RightHandVisualSlot = VisualSlot.AddSlot("RIghtHandVisual", false);
+                Slot RightHandVisualSlot = VisualSlot.AddSlot("RightHandVisual", false);
                 RightHandVisualSlot.AttachSphere(0.1F, DefaultMaterial, false);
                 var RightHandVirtualParent = UserCullingSlot.AttachComponent<VirtualParent>(true, null);
                 RightHandVirtualParent.OverrideParent.Value = user.Root.GetHandSlot(Chirality.Right, true).ReferenceID;
