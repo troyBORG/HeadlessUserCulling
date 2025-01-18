@@ -1,6 +1,5 @@
 using FrooxEngine;
 using FrooxEngine.CommonAvatar;
-using FrooxEngine.ProtoFlux;
 using ResoniteModLoader;
 
 namespace HeadlessUserCulling;
@@ -26,6 +25,7 @@ public partial class HeadlessUserCulling : ResoniteMod
                 PrimaryDistCheck.TargetField.Value = user.Root.Slot.ActiveSelf_Field.ReferenceID;
                 PrimaryDistCheck.NearValue.Value = true;
 
+                // Secondary distance check for enabling stuff while the user is culled
                 var SecondaryDistCheck = UserCullingSlot.AttachComponent<UserDistanceValueDriver<bool>>(true, null);
                 SecondaryDistCheck.Node.Value = UserRoot.UserNode.View;
                 SecondaryDistCheck.FarValue.Value = true;
@@ -78,8 +78,14 @@ public partial class HeadlessUserCulling : ResoniteMod
                 // Generates visuals for culled user's head and hands
                 Slot VisualSlot = HelpersSlot.AddSlot("Visuals", false);
 
+                // Gets the default pbs metallic to avoid duplicating materials
                 var DefaultMaterial = user.World.GetSharedComponentOrCreate("DefaultMaterial", delegate(PBS_Metallic mat) {}, 0, false, false, null);
 
+                // the slot structure will remain the same but the visuals
+                // will be changed and ideally made modular.
+                // The visuals also do not update with the user's body slots,
+                // I will be attempting to use value streams to supply
+                // the head and hands transform data
                 Slot HeadVisualSlot = VisualSlot.AddSlot("HeadVisual", false);
                 HeadVisualSlot.AttachSphere(0.15F, DefaultMaterial, false);
 
