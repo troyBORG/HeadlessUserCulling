@@ -19,6 +19,10 @@ public partial class HeadlessUserCulling : ResoniteMod
                 Slot DynVarSlot = UserCullingSlot.AddSlot("DynVars", false);
                 Slot HelpersSlot = UserCullingSlot.AddSlot("Helpers", false);
 
+                // Sets up a destroy proxy to clean up culling slots when the user leaves or respawns
+                var DestroyProxy = user.Root.Slot.AttachComponent<DestroyProxy>(true, null);
+                DestroyProxy.DestroyTarget.Value = UserCullingSlot.ReferenceID;
+
                 // Sets up the culling behavior via UserDistanceValueDriver and VirtualParent
                 var PrimaryDistCheck = UserCullingSlot.AttachComponent<UserDistanceValueDriver<bool>>(true, null);
                 PrimaryDistCheck.Node.Value = UserRoot.UserNode.View;
