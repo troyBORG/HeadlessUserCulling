@@ -102,13 +102,13 @@ public partial class HeadlessUserCulling : ResoniteMod
 
                 Slot LeftHandVisualSlot = VisualSlot.AddSlot("LeftHandVisual", false);
                 LeftHandVisualSlot.AttachSphere(0.1F, DefaultMaterial, false);
-                var LeftHandVirtualParent = UserCullingSlot.AttachComponent<VirtualParent>(true, null);
+                var LeftHandVirtualParent = LeftHandVisualSlot.AttachComponent<VirtualParent>(true, null);
                 LeftHandVirtualParent.OverrideParent.Value = user.Root.GetHandSlot(Chirality.Left, true).ReferenceID;
                 LeftHandVirtualParent.SetVirtualChild(LeftHandVisualSlot, false);
 
                 Slot RightHandVisualSlot = VisualSlot.AddSlot("RightHandVisual", false);
                 RightHandVisualSlot.AttachSphere(0.1F, DefaultMaterial, false);
-                var RightHandVirtualParent = UserCullingSlot.AttachComponent<VirtualParent>(true, null);
+                var RightHandVirtualParent = RightHandVisualSlot.AttachComponent<VirtualParent>(true, null);
                 RightHandVirtualParent.OverrideParent.Value = user.Root.GetHandSlot(Chirality.Right, true).ReferenceID;
                 RightHandVirtualParent.SetVirtualChild(RightHandVisualSlot, false);
             }
