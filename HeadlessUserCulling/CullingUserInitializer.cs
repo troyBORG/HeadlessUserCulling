@@ -22,12 +22,11 @@ public partial class HeadlessUserCulling : ResoniteMod
 
                 // Sets up a destroy proxy to clean up culling slots when the user leaves or respawns
                 var DestroyProxy = user.Root.Slot.AttachComponent<DestroyProxy>(true, null);
-                DestroyProxy.DestroyTarget.Value = UserCullingSlot.ReferenceID;
+                DestroyProxy.DestroyTarget.Target = UserCullingSlot;
 
                 // Sets up the culling behavior via UserDistanceValueDriver and VirtualParent
                 var PrimaryDistCheck = UserCullingSlot.AttachComponent<UserDistanceValueDriver<bool>>(true, null);
                 PrimaryDistCheck.Node.Value = UserRoot.UserNode.View;
-                //PrimaryDistCheck.TargetField.Value = user.Root.Slot.ActiveSelf_Field.ReferenceID;
                 PrimaryDistCheck.NearValue.Value = true;
                 
                 // Nightmare workaround for user respawning not supplying the user root
@@ -42,7 +41,7 @@ public partial class HeadlessUserCulling : ResoniteMod
                 SecondaryDistCheck.FarValue.Value = true;
 
                 var PrimaryVirtualParent = UserCullingSlot.AttachComponent<VirtualParent>(true, null);
-                PrimaryVirtualParent.OverrideParent.Value = user.Root.HeadSlot.ReferenceID;
+                PrimaryVirtualParent.OverrideParent.Target = user.Root.HeadSlot;
                 PrimaryVirtualParent.SetVirtualChild(UserCullingSlot, false);
 
                 // Workaround for odd behavior on user initial focus
@@ -51,7 +50,7 @@ public partial class HeadlessUserCulling : ResoniteMod
                 var HostOverride = UserCullingSlot.AttachComponent<ValueUserOverride<bool>>(true, null);
                 HostOverride.Default.Value = false;
                 HostOverride.CreateOverrideOnWrite.Value = true;
-                HostOverride.Target.Value = UserCullingSlot.GetComponent<UserDistanceValueDriver<bool>>().FarValue.ReferenceID;
+                HostOverride.Target.Target = UserCullingSlot.GetComponent<UserDistanceValueDriver<bool>>().FarValue;
                 PrimaryDistCheck.FarValue.Value = true;
 
                 // Sets up dyn vars to be adjustable by the user
@@ -59,12 +58,12 @@ public partial class HeadlessUserCulling : ResoniteMod
 
                 var PrimaryDistDriver = DistanceVarSlot.AttachComponent<DynamicValueVariableDriver<float>>(true, null);
                 PrimaryDistDriver.VariableName.Value = "HeadlessAvatarCulling/CullingDistance";
-                PrimaryDistDriver.Target.Value = PrimaryDistCheck.Distance.ReferenceID;
-                SecondaryDistCheck.TargetField.Value = HelpersSlot.ActiveSelf_Field.ReferenceID;
+                PrimaryDistDriver.Target.Target = PrimaryDistCheck.Distance;
+                SecondaryDistCheck.TargetField.Target = HelpersSlot.ActiveSelf_Field;
 
                 var SecondaryDistDriver = DistanceVarSlot.AttachComponent<DynamicValueVariableDriver<float>>(true, null);
                 SecondaryDistDriver.VariableName.Value = "HeadlessAvatarCulling/CullingDistance";
-                SecondaryDistDriver.Target.Value = SecondaryDistCheck.Distance.ReferenceID;
+                SecondaryDistDriver.Target.Target = SecondaryDistCheck.Distance;
 
                 // Recreates the Audio Output on the user
                 // to keep audio working while a user is culled
@@ -78,7 +77,7 @@ public partial class HeadlessUserCulling : ResoniteMod
                 AudioOutput.AudioTypeGroup.Value = AudioTypeGroup.Voice;
 
                 var AudioManager = AudioSlot.AttachComponent<AvatarAudioOutputManager>(true, null);
-                AudioManager.AudioOutput.Value = AudioOutput.ReferenceID;
+                AudioManager.AudioOutput.Target = AudioOutput;
                 AudioManager.OnEquip(user.Root.Slot.GetComponentInChildren<AvatarObjectSlot>());
 
                 // This is needed because otherwise, the min scale will
@@ -103,13 +102,13 @@ public partial class HeadlessUserCulling : ResoniteMod
                 Slot LeftHandVisualSlot = VisualSlot.AddSlot("LeftHandVisual", false);
                 LeftHandVisualSlot.AttachSphere(0.1F, DefaultMaterial, false);
                 var LeftHandVirtualParent = LeftHandVisualSlot.AttachComponent<VirtualParent>(true, null);
-                LeftHandVirtualParent.OverrideParent.Value = user.Root.GetHandSlot(Chirality.Left, true).ReferenceID;
+                LeftHandVirtualParent.OverrideParent.Target = user.Root.GetHandSlot(Chirality.Left, true);
                 LeftHandVirtualParent.SetVirtualChild(LeftHandVisualSlot, false);
 
                 Slot RightHandVisualSlot = VisualSlot.AddSlot("RightHandVisual", false);
                 RightHandVisualSlot.AttachSphere(0.1F, DefaultMaterial, false);
                 var RightHandVirtualParent = RightHandVisualSlot.AttachComponent<VirtualParent>(true, null);
-                RightHandVirtualParent.OverrideParent.Value = user.Root.GetHandSlot(Chirality.Right, true).ReferenceID;
+                RightHandVirtualParent.OverrideParent.Target = user.Root.GetHandSlot(Chirality.Right, true);
                 RightHandVirtualParent.SetVirtualChild(RightHandVisualSlot, false);
             }
         }, false, null, false);

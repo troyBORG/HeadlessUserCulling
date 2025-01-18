@@ -36,7 +36,7 @@ public partial class HeadlessUserCulling : ResoniteMod
                 var DistanceOverride = DistanceVarSlot.AttachComponent<ValueUserOverride<float>>(true, null);
                 DistanceOverride.Default.Value = 10;
                 DistanceOverride.CreateOverrideOnWrite.Value = true;
-                DistanceOverride.Target.Value = DistanceDynVar.Value.ReferenceID;
+                DistanceOverride.Target.Target = DistanceDynVar.Value;
 
                 // Sets up this world to set up users when they join
                 world.UserSpawn += InitializeUser;
