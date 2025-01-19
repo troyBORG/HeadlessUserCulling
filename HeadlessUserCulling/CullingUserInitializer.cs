@@ -39,11 +39,12 @@ public partial class HeadlessUserCulling : ResoniteMod
                 RootScaleDriver.ValueSource.Target = RootScaleStream;
                 RootScaleDriver.DriveTarget.Target = UserCullingSlot.Scale_Field;
                 
-                // Nightmare workaround for user respawning not supplying
-                // the user root active field to the distance value driver
-                var RefProxy = UserCullingSlot.AttachComponent<ValueField<RefID>>();
-                DistanceCheck.TargetField.DriveFrom(RefProxy.Value);
-                RefProxy.Value.Value = user.Root.Slot.ActiveSelf_Field.ReferenceID;
+                // Links the user active field to the distance component
+                // instead of writing it once to improve reliability,
+                // primarily for the user respawning.
+                var RefCast = UserCullingSlot.AttachComponent<ReferenceCast<Sync<bool>,IField<bool>>>();
+                RefCast.Source.Target = user.Root.Slot.ActiveSelf_Field;
+                RefCast.Target.Target = DistanceCheck.TargetField;
 
                 // Sets up a bool value driver to read the culled state and flip
                 // the value for other values to be enabled while the user is culled
