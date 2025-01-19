@@ -66,7 +66,7 @@ public partial class HeadlessUserCulling : ResoniteMod
                 Slot VisualSlot = HelpersSlot.AddSlot("Visuals", false);
 
                 // Gets the default pbs metallic to avoid duplicating materials
-                var DefaultMaterial = user.World.GetSharedComponentOrCreate<PBS_Metallic>("DefaultMaterial", null!);
+                var DefaultMaterial = user.World.GetSharedComponentOrCreate("DefaultMaterial", delegate(PBS_Metallic mat) {}, 0, false, false, null);
 
                 // This sets up the visuals and uses existing value streams from
                 // the user to drive the position and rotation of the culled visuals
