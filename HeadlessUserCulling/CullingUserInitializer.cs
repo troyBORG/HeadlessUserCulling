@@ -77,34 +77,65 @@ public partial class HeadlessUserCulling : ResoniteMod
 
                 // This sets up the visuals and uses existing value streams from
                 // the user to drive the position and rotation of the culled visuals
+
+                // Head visual setup
                 Slot HeadVisualSlot = VisualSlot.AddSlot("HeadVisual", false);
-                HeadVisualSlot.AttachSphere(0.15F, DefaultMaterial, false);
+
+                Slot HeadMeshSlot = HeadVisualSlot.AddSlot("Mesh", false);
+                HeadMeshSlot.Rotation_Field.Value = floatQ.Euler(90F, 180F, 180F);
+                var HeadMesh = HeadMeshSlot.AttachMesh<ConeMesh>(DefaultMaterial, false);
+                HeadMesh.Height.Value = 0.25F;
+                HeadMesh.RadiusBase.Value = 0.15F;
+                HeadMesh.Sides.Value = 3;
+                HeadMesh.FlatShading.Value = true;
+
                 var HeadPosStream = user.GetStreamOrAdd<ValueStream<float3>>("Head", null);
                 var HeadPosDriver = HeadVisualSlot.AttachComponent<ValueDriver<float3>>(true, null);
                 HeadPosDriver.ValueSource.Target = HeadPosStream;
                 HeadPosDriver.DriveTarget.Target = HeadVisualSlot.Position_Field;
+
                 var HeadRotStream = user.GetStreamOrAdd<ValueStream<floatQ>>("Head", null);
                 var HeadRotDriver = HeadVisualSlot.AttachComponent<ValueDriver<floatQ>>(true, null);
                 HeadRotDriver.ValueSource.Target = HeadRotStream;
                 HeadRotDriver.DriveTarget.Target = HeadVisualSlot.Rotation_Field;
 
+                // Left hand visual setup
                 Slot LeftHandVisualSlot = VisualSlot.AddSlot("LeftHandVisual", false);
-                LeftHandVisualSlot.AttachSphere(0.1F, DefaultMaterial, false);
+
+                Slot LeftHandMeshSlot = LeftHandVisualSlot.AddSlot("Mesh", false);
+                LeftHandMeshSlot.Rotation_Field.Value = floatQ.Euler(90F, 180F, 180F);
+                var LeftHandMesh = LeftHandMeshSlot.AttachMesh<ConeMesh>(DefaultMaterial, false);
+                LeftHandMesh.Height.Value = 0.2F;
+                LeftHandMesh.RadiusBase.Value = 0.1F;
+                LeftHandMesh.Sides.Value = 3;
+                LeftHandMesh.FlatShading.Value = true;
+
                 var LeftHandPosStream = user.GetStreamOrAdd<ValueStream<float3>>("LeftHand", null);
                 var LeftHandPosDriver = LeftHandVisualSlot.AttachComponent<ValueDriver<float3>>(true, null);
                 LeftHandPosDriver.ValueSource.Target = LeftHandPosStream;
                 LeftHandPosDriver.DriveTarget.Target = LeftHandVisualSlot.Position_Field;
+                
                 var LeftHandRotStream = user.GetStreamOrAdd<ValueStream<floatQ>>("LeftHand", null);
                 var LeftHandRotDriver = LeftHandVisualSlot.AttachComponent<ValueDriver<floatQ>>(true, null);
                 LeftHandRotDriver.ValueSource.Target = LeftHandRotStream;
                 LeftHandRotDriver.DriveTarget.Target = LeftHandVisualSlot.Rotation_Field;
 
+                // Right hand visual setup
                 Slot RightHandVisualSlot = VisualSlot.AddSlot("RightHandVisual", false);
-                RightHandVisualSlot.AttachSphere(0.1F, DefaultMaterial, false);
+
+                Slot RightHandMeshSlot = RightHandVisualSlot.AddSlot("Mesh", false);
+                RightHandMeshSlot.Rotation_Field.Value = floatQ.Euler(90F, 180F, 180F);
+                var RightHandMesh = RightHandMeshSlot.AttachMesh<ConeMesh>(DefaultMaterial, false);
+                RightHandMesh.Height.Value = 0.2F;
+                RightHandMesh.RadiusBase.Value = 0.1F;
+                RightHandMesh.Sides.Value = 3;
+                RightHandMesh.FlatShading.Value = true;
+
                 var RightHandPosStream = user.GetStreamOrAdd<ValueStream<float3>>("RightHand", null);
                 var RightHandPosDriver = RightHandVisualSlot.AttachComponent<ValueDriver<float3>>(true, null);
                 RightHandPosDriver.ValueSource.Target = RightHandPosStream;
                 RightHandPosDriver.DriveTarget.Target = RightHandVisualSlot.Position_Field;
+
                 var RightHandRotStream = user.GetStreamOrAdd<ValueStream<floatQ>>("RightHand", null);
                 var RightHandRotDriver = RightHandVisualSlot.AttachComponent<ValueDriver<floatQ>>(true, null);
                 RightHandRotDriver.ValueSource.Target = RightHandRotStream;
