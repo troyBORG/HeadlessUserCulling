@@ -9,7 +9,7 @@ public partial class HeadlessUserCulling : ResoniteMod
     {
         world.RunSynchronously(() => 
         {
-            if (Config.GetValue(Enable))
+            if (Config!.GetValue(Enable))
             {
                 // Create and setup culling system root slot
                 Slot CullingRoot = world.RootSlot.AddSlot("HeadlessCullingSystem", false);
