@@ -14,14 +14,9 @@ public partial class HeadlessUserCulling : ResoniteMod
                 // Create and setup culling system root slot
                 Slot CullingRoot = world.RootSlot.AddSlot("HeadlessCullingSystem", false);
                 CullingRoot.ParentReference.DriveFromRef(CullingRoot.ParentReference, false, false, true);
-                CullingRoot.OrderOffset = -100000;
+                CullingRoot.OrderOffset = long.MinValue;
                 Slot DynVarSlot = CullingRoot.AddSlot("DynVars", false);
                 CullingRoot.Tag = "HeadlessCullingRoot";
-                
-                // Protect work slot from being tampered with
-                CullingRoot.AttachComponent<DestroyBlock>();
-                CullingRoot.AttachComponent<DuplicateBlock>();
-                CullingRoot.AttachComponent<SearchBlock>();
 
                 // Setup DynamicVariableSpace to allow for user configuration
                 var DynVarSpace = CullingRoot.AttachComponent<DynamicVariableSpace>();
