@@ -25,20 +25,23 @@ public partial class HeadlessUserCulling : ResoniteMod
                 DestroyProxy.DestroyTarget.Target = UserCullingSlot;
 
                 // Sets up the culling behavior via UserDistanceValueDriver and VirtualParent
-                var PrimaryDistCheck = UserCullingSlot.AttachComponent<UserDistanceValueDriver<bool>>(true, null);
-                PrimaryDistCheck.Node.Value = UserRoot.UserNode.View;
-                PrimaryDistCheck.NearValue.Value = true;
+                var DistanceCheck = UserCullingSlot.AttachComponent<UserDistanceValueDriver<bool>>(true, null);
+                DistanceCheck.Node.Value = UserRoot.UserNode.View;
+                DistanceCheck.NearValue.Value = true;
                 
                 // Nightmare workaround for user respawning not supplying the user root
                 // active field to the primary distance check
                 var RefProxy = UserCullingSlot.AttachComponent<ValueField<RefID>>(true, null);
-                PrimaryDistCheck.TargetField.DriveFrom(RefProxy.Value);
+                DistanceCheck.TargetField.DriveFrom(RefProxy.Value);
                 RefProxy.Value.Value = user.Root.Slot.ActiveSelf_Field.ReferenceID;
 
-                // Secondary distance check for enabling stuff while the user is culled
-                var SecondaryDistCheck = UserCullingSlot.AttachComponent<UserDistanceValueDriver<bool>>(true, null);
-                SecondaryDistCheck.Node.Value = UserRoot.UserNode.View;
-                SecondaryDistCheck.FarValue.Value = true;
+                // Sets up a bool value driver to read the culled state and flip
+                // the value for other values to be enabled while the user is culled
+                var BoolFlip = UserCullingSlot.AttachComponent<BooleanValueDriver<bool>>(true, null);
+                BoolFlip.State.DriveFrom(user.Root.Slot.ActiveSelf_Field);
+                BoolFlip.TargetField.Value = HelpersSlot.ActiveSelf_Field.ReferenceID;
+                BoolFlip.FalseValue.Value = true;
+                BoolFlip.TrueValue.DriveFrom(DistanceCheck.FarValue);
 
                 var PrimaryVirtualParent = UserCullingSlot.AttachComponent<VirtualParent>(true, null);
                 PrimaryVirtualParent.OverrideParent.Target = user.Root.HeadSlot;
@@ -51,19 +54,14 @@ public partial class HeadlessUserCulling : ResoniteMod
                 HostOverride.Default.Value = false;
                 HostOverride.CreateOverrideOnWrite.Value = true;
                 HostOverride.Target.Target = UserCullingSlot.GetComponent<UserDistanceValueDriver<bool>>().FarValue;
-                PrimaryDistCheck.FarValue.Value = true;
+                DistanceCheck.FarValue.Value = true;
 
                 // Sets up dyn vars to be adjustable by the user
                 Slot DistanceVarSlot = DynVarSlot.AddSlot("Distance", false);
 
-                var PrimaryDistDriver = DistanceVarSlot.AttachComponent<DynamicValueVariableDriver<float>>(true, null);
-                PrimaryDistDriver.VariableName.Value = "HeadlessAvatarCulling/CullingDistance";
-                PrimaryDistDriver.Target.Target = PrimaryDistCheck.Distance;
-                SecondaryDistCheck.TargetField.Target = HelpersSlot.ActiveSelf_Field;
-
-                var SecondaryDistDriver = DistanceVarSlot.AttachComponent<DynamicValueVariableDriver<float>>(true, null);
-                SecondaryDistDriver.VariableName.Value = "HeadlessAvatarCulling/CullingDistance";
-                SecondaryDistDriver.Target.Target = SecondaryDistCheck.Distance;
+                var DistanceDriver = DistanceVarSlot.AttachComponent<DynamicValueVariableDriver<float>>(true, null);
+                DistanceDriver.VariableName.Value = "HeadlessAvatarCulling/CullingDistance";
+                DistanceDriver.Target.Target = DistanceCheck.Distance;
 
                 // Recreates the Audio Output on the user
                 // to keep audio working while a user is culled
