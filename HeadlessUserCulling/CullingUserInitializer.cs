@@ -30,6 +30,10 @@ public partial class HeadlessUserCulling : ResoniteMod
                 DistanceCheck.Node.Value = UserRoot.UserNode.View;
                 DistanceCheck.NearValue.Value = true;
 
+                // The host needs to see the user to spawn properly,
+                // this override prevents weird issues on user spawn.
+                DistanceCheck.FarValue.OverrideForUser(user.World.HostUser, true);
+
                 var CopyGlobalTransform = UserCullingSlot.AttachComponent<CopyGlobalTransform>();
                 CopyGlobalTransform.Source.Target = user.Root.Slot;
 
@@ -50,15 +54,6 @@ public partial class HeadlessUserCulling : ResoniteMod
                 BoolFlip.TargetField.Value = HelpersSlot.ActiveSelf_Field.ReferenceID;
                 BoolFlip.FalseValue.Value = true;
                 BoolFlip.TrueValue.DriveFrom(DistanceCheck.FarValue);
-
-                // Workaround for odd behavior on user initial focus
-                // I intend to replace this eventually, but if I cannot
-                // find a better method this will stay as is
-                var HostOverride = UserCullingSlot.AttachComponent<ValueUserOverride<bool>>();
-                HostOverride.Default.Value = false;
-                HostOverride.CreateOverrideOnWrite.Value = true;
-                HostOverride.Target.Target = UserCullingSlot.GetComponent<UserDistanceValueDriver<bool>>().FarValue;
-                DistanceCheck.FarValue.Value = true;
 
                 // Sets up dyn vars to be adjustable by the user
                 Slot DistanceVarSlot = DynVarSlot.AddSlot("Distance", false);
