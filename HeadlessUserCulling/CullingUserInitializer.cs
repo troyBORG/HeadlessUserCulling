@@ -69,26 +69,6 @@ public partial class HeadlessUserCulling : ResoniteMod
                 DistanceDriver.VariableName.Value = "HeadlessAvatarCulling/CullingDistance";
                 DistanceDriver.Target.Target = DistanceCheck.Distance;
 
-                // Recreates the Audio Output on the user
-                // to keep audio working while a user is culled
-                var UserVoice = user.Root.Slot.GetComponent<AvatarVoiceInfo>().AudioSource.Value;
-
-                Slot AudioSlot = HelpersSlot.AddSlot("Audio", false);
-
-                var AudioOutput = AudioSlot.AttachComponent<AudioOutput>(true, null);
-                AudioOutput.Source.Value = UserVoice;
-                AudioOutput.Priority.Value = 0;
-                AudioOutput.AudioTypeGroup.Value = AudioTypeGroup.Voice;
-
-                var AudioManager = AudioSlot.AttachComponent<AvatarAudioOutputManager>(true, null);
-                AudioManager.AudioOutput.Target = AudioOutput;
-                AudioManager.OnEquip(user.Root.Slot.GetComponentInChildren<AvatarObjectSlot>());
-
-                // This is needed because otherwise, the min scale will
-                // be set to Infinity, making the audio output not work
-                AudioOutput.MinScale.ActiveLink.ReleaseLink(true);
-                AudioOutput.MinScale.Value = 1F;
-
                 // Generates visuals for culled user's head and hands
                 Slot VisualSlot = HelpersSlot.AddSlot("Visuals", false);
 
@@ -129,6 +109,26 @@ public partial class HeadlessUserCulling : ResoniteMod
                 var RightHandRotDriver = RightHandVisualSlot.AttachComponent<ValueDriver<floatQ>>(true, null);
                 RightHandRotDriver.ValueSource.Target = RightHandRotStream;
                 RightHandRotDriver.DriveTarget.Target = RightHandVisualSlot.Rotation_Field;
+
+                // Recreates the Audio Output on the user
+                // to keep audio working while a user is culled
+                var UserVoice = user.Root.Slot.GetComponent<AvatarVoiceInfo>().AudioSource.Value;
+
+                Slot AudioSlot = HeadVisualSlot.AddSlot("Audio", false);
+
+                var AudioOutput = AudioSlot.AttachComponent<AudioOutput>(true, null);
+                AudioOutput.Source.Value = UserVoice;
+                AudioOutput.Priority.Value = 0;
+                AudioOutput.AudioTypeGroup.Value = AudioTypeGroup.Voice;
+
+                var AudioManager = AudioSlot.AttachComponent<AvatarAudioOutputManager>(true, null);
+                AudioManager.AudioOutput.Target = AudioOutput;
+                AudioManager.OnEquip(user.Root.Slot.GetComponentInChildren<AvatarObjectSlot>());
+
+                // This is needed because otherwise, the min scale will
+                // be set to Infinity, making the audio output not work
+                AudioOutput.MinScale.ActiveLink.ReleaseLink(true);
+                AudioOutput.MinScale.Value = 1F;
             }
         }, false, null, false);
     }
