@@ -24,7 +24,8 @@ public partial class HeadlessUserCulling : ResoniteMod
                 var DestroyProxy = user.Root.Slot.AttachComponent<DestroyProxy>();
                 DestroyProxy.DestroyTarget.Target = UserCullingSlot;
 
-                // Sets up the culling behavior via UserDistanceValueDriver and CopyGlobalTransform
+                // Sets up the culling behavior via UserDistanceValueDriver, 
+                // CopyGlobalTransform, and CopyGlobalScale
                 var DistanceCheck = UserCullingSlot.AttachComponent<UserDistanceValueDriver<bool>>();
                 DistanceCheck.Node.Value = UserRoot.UserNode.View;
                 DistanceCheck.NearValue.Value = true;
@@ -32,12 +33,8 @@ public partial class HeadlessUserCulling : ResoniteMod
                 var CopyGlobalTransform = UserCullingSlot.AttachComponent<CopyGlobalTransform>();
                 CopyGlobalTransform.Source.Target = user.Root.Slot;
 
-                // Drives the root scale of the user's culling
-                // slots so the scale stays consistent
-                var RootScaleStream = user.GetStreamOrAdd<ValueStream<float3>>("Root.Scale", null);
-                var RootScaleDriver = UserCullingSlot.AttachComponent<ValueDriver<float3>>();
-                RootScaleDriver.ValueSource.Target = RootScaleStream;
-                RootScaleDriver.DriveTarget.Target = UserCullingSlot.Scale_Field;
+                var CopyGlobalScale = UserCullingSlot.AttachComponent<CopyGlobalScale>();
+                CopyGlobalScale.Source.Target = user.Root.Slot;
                 
                 // Links the user active field to the distance component
                 // instead of writing it once to improve reliability,
