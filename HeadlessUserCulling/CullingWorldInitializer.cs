@@ -19,21 +19,21 @@ public partial class HeadlessUserCulling : ResoniteMod
                 CullingRoot.Tag = "HeadlessCullingRoot";
                 
                 // Protect work slot from being tampered with
-                CullingRoot.AttachComponent<DestroyBlock>(true, null);
-                CullingRoot.AttachComponent<DuplicateBlock>(true, null);
-                CullingRoot.AttachComponent<SearchBlock>(true, null);
+                CullingRoot.AttachComponent<DestroyBlock>();
+                CullingRoot.AttachComponent<DuplicateBlock>();
+                CullingRoot.AttachComponent<SearchBlock>();
 
                 // Setup DynamicVariableSpace to allow for user configuration
-                var DynVarSpace = CullingRoot.AttachComponent<DynamicVariableSpace>(true, null);
+                var DynVarSpace = CullingRoot.AttachComponent<DynamicVariableSpace>();
                 DynVarSpace.SpaceName.Value = "HeadlessAvatarCulling";
 
                 // Setup Distance variable
                 Slot DistanceVarSlot = DynVarSlot.AddSlot("Distance", false);
 
-                var DistanceDynVar = DistanceVarSlot.AttachComponent<DynamicValueVariable<float>>(true, null);
+                var DistanceDynVar = DistanceVarSlot.AttachComponent<DynamicValueVariable<float>>();
                 DistanceDynVar.VariableName.Value = "HeadlessAvatarCulling/CullingDistance";
 
-                var DistanceOverride = DistanceVarSlot.AttachComponent<ValueUserOverride<float>>(true, null);
+                var DistanceOverride = DistanceVarSlot.AttachComponent<ValueUserOverride<float>>();
                 DistanceOverride.Default.Value = 10;
                 DistanceOverride.CreateOverrideOnWrite.Value = true;
                 DistanceOverride.Target.Target = DistanceDynVar.Value;
