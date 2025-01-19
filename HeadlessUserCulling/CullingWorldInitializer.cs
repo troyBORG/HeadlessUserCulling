@@ -36,6 +36,6 @@ public partial class HeadlessUserCulling : ResoniteMod
                 // Sets up this world to set up users when they join
                 world.UserSpawn += InitializeUser;
             }
-        }, false, null, false);
+        });
     }
 }
