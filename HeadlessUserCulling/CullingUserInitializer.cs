@@ -158,6 +158,9 @@ public partial class HeadlessUserCulling : ResoniteMod
                 // be set to Infinity, making the audio output not work
                 AudioOutput.MinScale.ActiveLink.ReleaseLink(true);
                 AudioOutput.MinScale.Value = 1F;
+
+                // Causes the user's culled slots to regenerate if destroyed
+                UserCullingSlot.Destroyed += d => { InitializeUser(user); };
             }
         });
     }
