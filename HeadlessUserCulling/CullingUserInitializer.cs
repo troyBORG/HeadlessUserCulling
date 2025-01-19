@@ -24,10 +24,6 @@ public partial class HeadlessUserCulling : ResoniteMod
                 var UserOverride = UserCullingSlot.ActiveSelf_Field.OverrideForUser(user, false);
                 UserOverride.Default.Value = true;
 
-                // Sets up a destroy proxy to clean up culling slots when the user leaves or respawns
-                var DestroyProxy = user.Root.Slot.AttachComponent<DestroyProxy>();
-                DestroyProxy.DestroyTarget.Target = UserCullingSlot;
-
                 // Sets up the culling behavior via UserDistanceValueDriver, 
                 // CopyGlobalTransform, and CopyGlobalScale
                 var DistanceCheck = UserCullingSlot.AttachComponent<UserDistanceValueDriver<bool>>();
@@ -165,6 +161,10 @@ public partial class HeadlessUserCulling : ResoniteMod
 
                 // Causes the user's culled slots to regenerate if destroyed
                 UserCullingSlot.Destroyed += d => { InitializeUser(user); };
+
+                // Cuases thee user's culled slots to be deleted when the
+                // user's root slot is destroyed for whatever reason
+                user.Root.Slot.Destroyed += d => { UserCullingSlot.Destroy(); };
             }
         });
     }
