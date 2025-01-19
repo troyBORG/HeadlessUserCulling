@@ -20,6 +20,10 @@ public partial class HeadlessUserCulling : ResoniteMod
                 Slot DynVarSlot = UserCullingSlot.AddSlot("DynVars", false);
                 Slot HelpersSlot = UserCullingSlot.AddSlot("Helpers", false);
 
+                // Prevents the user from culling themselves
+                var UserOverride = UserCullingSlot.ActiveSelf_Field.OverrideForUser(user, false);
+                UserOverride.Default.Value = true;
+
                 // Sets up a destroy proxy to clean up culling slots when the user leaves or respawns
                 var DestroyProxy = user.Root.Slot.AttachComponent<DestroyProxy>();
                 DestroyProxy.DestroyTarget.Target = UserCullingSlot;
