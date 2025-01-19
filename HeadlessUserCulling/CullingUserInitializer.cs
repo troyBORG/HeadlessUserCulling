@@ -24,13 +24,23 @@ public partial class HeadlessUserCulling : ResoniteMod
                 var DestroyProxy = user.Root.Slot.AttachComponent<DestroyProxy>(true, null);
                 DestroyProxy.DestroyTarget.Target = UserCullingSlot;
 
-                // Sets up the culling behavior via UserDistanceValueDriver and VirtualParent
+                // Sets up the culling behavior via UserDistanceValueDriver and CopyGlobalTransform
                 var DistanceCheck = UserCullingSlot.AttachComponent<UserDistanceValueDriver<bool>>(true, null);
                 DistanceCheck.Node.Value = UserRoot.UserNode.View;
                 DistanceCheck.NearValue.Value = true;
+
+                var CopyGlobalTransform = UserCullingSlot.AttachComponent<CopyGlobalTransform>(true, null);
+                CopyGlobalTransform.Source.Target = user.Root.Slot;
+
+                // Drives the root scale of the user's culling
+                // slots so the scale stays consistent
+                var RootScaleStream = user.GetStreamOrAdd<ValueStream<float3>>("Root.Scale", null);
+                var RootScaleDriver = UserCullingSlot.AttachComponent<ValueDriver<float3>>(true, null);
+                RootScaleDriver.ValueSource.Target = RootScaleStream;
+                RootScaleDriver.DriveTarget.Target = UserCullingSlot.Scale_Field;
                 
-                // Nightmare workaround for user respawning not supplying the user root
-                // active field to the primary distance check
+                // Nightmare workaround for user respawning not supplying
+                // the user root active field to the distance value driver
                 var RefProxy = UserCullingSlot.AttachComponent<ValueField<RefID>>(true, null);
                 DistanceCheck.TargetField.DriveFrom(RefProxy.Value);
                 RefProxy.Value.Value = user.Root.Slot.ActiveSelf_Field.ReferenceID;
@@ -42,10 +52,6 @@ public partial class HeadlessUserCulling : ResoniteMod
                 BoolFlip.TargetField.Value = HelpersSlot.ActiveSelf_Field.ReferenceID;
                 BoolFlip.FalseValue.Value = true;
                 BoolFlip.TrueValue.DriveFrom(DistanceCheck.FarValue);
-
-                var PrimaryVirtualParent = UserCullingSlot.AttachComponent<VirtualParent>(true, null);
-                PrimaryVirtualParent.OverrideParent.Target = user.Root.HeadSlot;
-                PrimaryVirtualParent.SetVirtualChild(UserCullingSlot, false);
 
                 // Workaround for odd behavior on user initial focus
                 // I intend to replace this eventually, but if I cannot
@@ -89,25 +95,40 @@ public partial class HeadlessUserCulling : ResoniteMod
                 // Gets the default pbs metallic to avoid duplicating materials
                 var DefaultMaterial = user.World.GetSharedComponentOrCreate("DefaultMaterial", delegate(PBS_Metallic mat) {}, 0, false, false, null);
 
-                // the slot structure will remain the same but the visuals
-                // will be changed and ideally made modular.
-                // The visuals also do not update with the user's body slots,
-                // I will be attempting to use value streams to supply
-                // the head and hands transform data
+                // This sets up the visuals and uses existing value streams from
+                // the user to drive the position and rotation of the culled visuals
                 Slot HeadVisualSlot = VisualSlot.AddSlot("HeadVisual", false);
                 HeadVisualSlot.AttachSphere(0.15F, DefaultMaterial, false);
+                var HeadPosStream = user.GetStreamOrAdd<ValueStream<float3>>("Head", null);
+                var HeadPosDriver = HeadVisualSlot.AttachComponent<ValueDriver<float3>>(true, null);
+                HeadPosDriver.ValueSource.Target = HeadPosStream;
+                HeadPosDriver.DriveTarget.Target = HeadVisualSlot.Position_Field;
+                var HeadRotStream = user.GetStreamOrAdd<ValueStream<floatQ>>("Head", null);
+                var HeadRotDriver = HeadVisualSlot.AttachComponent<ValueDriver<floatQ>>(true, null);
+                HeadRotDriver.ValueSource.Target = HeadRotStream;
+                HeadRotDriver.DriveTarget.Target = HeadVisualSlot.Rotation_Field;
 
                 Slot LeftHandVisualSlot = VisualSlot.AddSlot("LeftHandVisual", false);
                 LeftHandVisualSlot.AttachSphere(0.1F, DefaultMaterial, false);
-                var LeftHandVirtualParent = LeftHandVisualSlot.AttachComponent<VirtualParent>(true, null);
-                LeftHandVirtualParent.OverrideParent.Target = user.Root.GetHandSlot(Chirality.Left, true);
-                LeftHandVirtualParent.SetVirtualChild(LeftHandVisualSlot, false);
+                var LeftHandPosStream = user.GetStreamOrAdd<ValueStream<float3>>("LeftHand", null);
+                var LeftHandPosDriver = LeftHandVisualSlot.AttachComponent<ValueDriver<float3>>(true, null);
+                LeftHandPosDriver.ValueSource.Target = LeftHandPosStream;
+                LeftHandPosDriver.DriveTarget.Target = LeftHandVisualSlot.Position_Field;
+                var LeftHandRotStream = user.GetStreamOrAdd<ValueStream<floatQ>>("LeftHand", null);
+                var LeftHandRotDriver = LeftHandVisualSlot.AttachComponent<ValueDriver<floatQ>>(true, null);
+                LeftHandRotDriver.ValueSource.Target = LeftHandRotStream;
+                LeftHandRotDriver.DriveTarget.Target = LeftHandVisualSlot.Rotation_Field;
 
                 Slot RightHandVisualSlot = VisualSlot.AddSlot("RightHandVisual", false);
                 RightHandVisualSlot.AttachSphere(0.1F, DefaultMaterial, false);
-                var RightHandVirtualParent = RightHandVisualSlot.AttachComponent<VirtualParent>(true, null);
-                RightHandVirtualParent.OverrideParent.Target = user.Root.GetHandSlot(Chirality.Right, true);
-                RightHandVirtualParent.SetVirtualChild(RightHandVisualSlot, false);
+                var RightHandPosStream = user.GetStreamOrAdd<ValueStream<float3>>("RightHand", null);
+                var RightHandPosDriver = RightHandVisualSlot.AttachComponent<ValueDriver<float3>>(true, null);
+                RightHandPosDriver.ValueSource.Target = RightHandPosStream;
+                RightHandPosDriver.DriveTarget.Target = RightHandVisualSlot.Position_Field;
+                var RightHandRotStream = user.GetStreamOrAdd<ValueStream<floatQ>>("RightHand", null);
+                var RightHandRotDriver = RightHandVisualSlot.AttachComponent<ValueDriver<floatQ>>(true, null);
+                RightHandRotDriver.ValueSource.Target = RightHandRotStream;
+                RightHandRotDriver.DriveTarget.Target = RightHandVisualSlot.Rotation_Field;
             }
         }, false, null, false);
     }
