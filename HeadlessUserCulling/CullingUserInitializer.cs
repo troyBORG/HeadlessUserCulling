@@ -16,7 +16,7 @@ public partial class HeadlessUserCulling : ResoniteMod
                 // Create and setup user specific culling slots
                 Slot CullingRoot = user.World.RootSlot.GetChildrenWithTag("HeadlessCullingRoot").First();
                 Slot UserCullingSlot = CullingRoot.AddSlot(user.UserID, false);
-                UserCullingSlot.Tag = null;
+                UserCullingSlot.Tag = null!;
                 Slot DynVarSlot = UserCullingSlot.AddSlot("DynVars", false);
                 Slot HelpersSlot = UserCullingSlot.AddSlot("Helpers", false);
 
@@ -71,7 +71,7 @@ public partial class HeadlessUserCulling : ResoniteMod
                 Slot VisualSlot = HelpersSlot.AddSlot("Visuals", false);
 
                 // Gets the default pbs metallic to avoid duplicating materials
-                var DefaultMaterial = user.World.GetSharedComponentOrCreate("DefaultMaterial", delegate(PBS_Metallic mat) {}, 0, false, false, null);
+                var DefaultMaterial = user.World.GetSharedComponentOrCreate<PBS_Metallic>("DefaultMaterial", null!);
 
                 // This sets up the visuals and uses existing value streams from
                 // the user to drive the position and rotation of the culled visuals
@@ -87,12 +87,12 @@ public partial class HeadlessUserCulling : ResoniteMod
                 HeadMesh.Sides.Value = 3;
                 HeadMesh.FlatShading.Value = true;
 
-                var HeadPosStream = user.GetStreamOrAdd<ValueStream<float3>>("Head", null);
+                var HeadPosStream = user.GetStream<ValueStream<float3>>(s => s.Name == "Head");
                 var HeadPosDriver = HeadVisualSlot.AttachComponent<ValueDriver<float3>>();
                 HeadPosDriver.ValueSource.Target = HeadPosStream;
                 HeadPosDriver.DriveTarget.Target = HeadVisualSlot.Position_Field;
 
-                var HeadRotStream = user.GetStreamOrAdd<ValueStream<floatQ>>("Head", null);
+                var HeadRotStream = user.GetStream<ValueStream<floatQ>>(s => s.Name == "Head");
                 var HeadRotDriver = HeadVisualSlot.AttachComponent<ValueDriver<floatQ>>();
                 HeadRotDriver.ValueSource.Target = HeadRotStream;
                 HeadRotDriver.DriveTarget.Target = HeadVisualSlot.Rotation_Field;
@@ -108,12 +108,12 @@ public partial class HeadlessUserCulling : ResoniteMod
                 LeftHandMesh.Sides.Value = 3;
                 LeftHandMesh.FlatShading.Value = true;
 
-                var LeftHandPosStream = user.GetStreamOrAdd<ValueStream<float3>>("LeftHand", null);
+                var LeftHandPosStream = user.GetStream<ValueStream<float3>>(s => s.Name == "LeftHand");
                 var LeftHandPosDriver = LeftHandVisualSlot.AttachComponent<ValueDriver<float3>>();
                 LeftHandPosDriver.ValueSource.Target = LeftHandPosStream;
                 LeftHandPosDriver.DriveTarget.Target = LeftHandVisualSlot.Position_Field;
                 
-                var LeftHandRotStream = user.GetStreamOrAdd<ValueStream<floatQ>>("LeftHand", null);
+                var LeftHandRotStream = user.GetStream<ValueStream<floatQ>>(s => s.Name == "LeftHand");
                 var LeftHandRotDriver = LeftHandVisualSlot.AttachComponent<ValueDriver<floatQ>>();
                 LeftHandRotDriver.ValueSource.Target = LeftHandRotStream;
                 LeftHandRotDriver.DriveTarget.Target = LeftHandVisualSlot.Rotation_Field;
@@ -129,12 +129,12 @@ public partial class HeadlessUserCulling : ResoniteMod
                 RightHandMesh.Sides.Value = 3;
                 RightHandMesh.FlatShading.Value = true;
 
-                var RightHandPosStream = user.GetStreamOrAdd<ValueStream<float3>>("RightHand", null);
+                var RightHandPosStream = user.GetStream<ValueStream<float3>>(s => s.Name == "RightHand");
                 var RightHandPosDriver = RightHandVisualSlot.AttachComponent<ValueDriver<float3>>();
                 RightHandPosDriver.ValueSource.Target = RightHandPosStream;
                 RightHandPosDriver.DriveTarget.Target = RightHandVisualSlot.Position_Field;
 
-                var RightHandRotStream = user.GetStreamOrAdd<ValueStream<floatQ>>("RightHand", null);
+                var RightHandRotStream = user.GetStream<ValueStream<floatQ>>(s => s.Name == "RightHand");
                 var RightHandRotDriver = RightHandVisualSlot.AttachComponent<ValueDriver<floatQ>>();
                 RightHandRotDriver.ValueSource.Target = RightHandRotStream;
                 RightHandRotDriver.DriveTarget.Target = RightHandVisualSlot.Rotation_Field;
@@ -159,6 +159,6 @@ public partial class HeadlessUserCulling : ResoniteMod
                 AudioOutput.MinScale.ActiveLink.ReleaseLink(true);
                 AudioOutput.MinScale.Value = 1F;
             }
-        }, false, null, false);
+        });
     }
 }
