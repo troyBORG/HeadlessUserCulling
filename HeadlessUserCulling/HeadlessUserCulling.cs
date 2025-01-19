@@ -1,5 +1,4 @@
-﻿using HarmonyLib;
-using ResoniteModLoader;
+﻿using ResoniteModLoader;
 using FrooxEngine;
 
 namespace HeadlessUserCulling;
@@ -14,10 +13,8 @@ public partial class HeadlessUserCulling : ResoniteMod
 
     public override void OnEngineInit()
     {
-        Harmony harmony = new("net.raidriar796.HeadlessUserCulling");
         Config = GetConfiguration();
         Config?.Save(true);
-        harmony.PatchAll();
 
         Engine.Current.RunPostInit(() => 
         {
