@@ -98,15 +98,10 @@ public partial class HeadlessUserCulling : ResoniteMod
 
         // Write Dynamic float Node
         var WriteDistVar = ProtofluxSlot.AttachComponent<WriteDynamicValueVariable<float>>();
+        ButtonEvents.GetImpulse(0).Target = WriteDistVar;
         WriteDistVar.TryConnectInput(WriteDistVar.GetInput(0), FindCullingRoot.GetOutput(0), false, false);
         WriteDistVar.TryConnectInput(WriteDistVar.GetInput(1), DynVarStringInput.GetOutput(0), false, false);
         WriteDistVar.TryConnectInput(WriteDistVar.GetInput(2), DistValueSource.GetOutput(0), false, false);
-
-        // This sets up a ref cast to assign the pressed field on button events
-        // because I cannot figure out how you're actually supposed to connect impulses
-        var RefCast = ProtofluxSlot.AttachComponent<ReferenceCast<WriteDynamicValueVariable<float>,ISyncNodeOperation>>();
-        RefCast.Source.Target = WriteDistVar;
-        RefCast.Target.Target = ButtonEvents.Pressed;
 
         // Sets up the context menu to destroy itself when
         // the user's culling root is destroyed
