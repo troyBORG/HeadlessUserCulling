@@ -62,7 +62,7 @@ public partial class HeadlessUserCulling : ResoniteMod
                 Slot DistanceVarSlot = DynVarSlot.AddSlot("Distance", false);
 
                 var DistanceDriver = DistanceVarSlot.AttachComponent<DynamicValueVariableDriver<float>>();
-                DistanceDriver.VariableName.Value = "HeadlessAvatarCulling/CullingDistance";
+                DistanceDriver.VariableName.Value = "HeadlessUserCulling/CullingDistance";
                 DistanceDriver.Target.Target = DistanceCheck.Distance;
 
                 // Generates visuals for culled user's head and hands
@@ -158,7 +158,7 @@ public partial class HeadlessUserCulling : ResoniteMod
                 AudioOutput.MinScale.Value = 1F;
 
                 // Generates a context menu if the host decides to enable it
-                if (Config!.GetValue(AutoGenContextMenu)) InitializeContextMenu(user, CullingRoot);
+                if (Config!.GetValue(AutoGenContextMenu)) InitializeContextMenu(user, UserCullingSlot);
 
                 // Causes the user's culled slots to regenerate if destroyed
                 UserCullingSlot.Destroyed += d => 

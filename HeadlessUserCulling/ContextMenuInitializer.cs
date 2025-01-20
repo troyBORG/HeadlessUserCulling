@@ -1,38 +1,115 @@
 using Elements.Core;
 using FrooxEngine;
+using FrooxEngine.ProtoFlux;
+using FrooxEngine.ProtoFlux.CoreNodes;
+using FrooxEngine.ProtoFlux.Runtimes.Execution.Nodes;
+using FrooxEngine.ProtoFlux.Runtimes.Execution.Nodes.ParsingFormatting;
+using FrooxEngine.ProtoFlux.Runtimes.Execution.Nodes.Strings;
+using FrooxEngine.ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Interaction;
+using FrooxEngine.ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Slots;
+using FrooxEngine.ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Variables;
 using ResoniteModLoader;
 
 namespace HeadlessUserCulling;
 
 public partial class HeadlessUserCulling : ResoniteMod
 {
-    private static void InitializeContextMenu(User user, Slot CullingRoot)
+    private static void InitializeContextMenu(User user, Slot UserCullingSlot)
     {
-        // Checks for existing context menu
-        if (user.Root.Slot.GetChildrenWithTag("HeadlessCullingContextMenu") == null)
-        {
-            // Sets up context menu
-            Slot ContextMenuSlot = user.Root.Slot.AddSlot("HeadlessCullingContextMenu", false);
-            ContextMenuSlot.Tag = "HeadlessCullingContextMenu";
+        // Sets up context menu
+        Slot ContextMenuSlot = user.Root.Slot.AddSlot("HeadlessCullingContextMenu", false);
 
-            var ItemSource = ContextMenuSlot.AttachComponent<ContextMenuItemSource>();
-            ItemSource.Color.Value = colorX.Yellow;
+        var ItemSource = ContextMenuSlot.AttachComponent<ContextMenuItemSource>();
+        ItemSource.Color.Value = colorX.Yellow;
 
-            var RootItem = ContextMenuSlot.AttachComponent<RootContextMenuItem>();
-            RootItem.Item.Target = ItemSource;
+        var RootItem = ContextMenuSlot.AttachComponent<RootContextMenuItem>();
+        RootItem.Item.Target = ItemSource;
 
-            // This holds the value that will be used to update
-            // the dynamic variable through protoflux
-            var DistValue = ContextMenuSlot.AttachComponent<ValueField<float>>();
-            DistValue.Value.Value = 10F;
+        // This holds the value that will be used to update
+        // the dynamic variable through protoflux
+        var DistValue = ContextMenuSlot.AttachComponent<ValueField<float>>();
+        DistValue.Value.Value = 10F;
 
-            var ButtonCycle = ContextMenuSlot.AttachComponent<ButtonValueCycle<float>>();
-            ButtonCycle.TargetValue.Target = DistValue.Value;
-            ButtonCycle.Values.Add(float.PositiveInfinity);
-            ButtonCycle.Values.Add(20F);
-            ButtonCycle.Values.Add(10F);
-            ButtonCycle.Values.Add(5F);
-            ButtonCycle.Values.Add(2F);
-        }
+        var ButtonCycle = ContextMenuSlot.AttachComponent<ButtonValueCycle<float>>();
+        ButtonCycle.TargetValue.Target = DistValue.Value;
+        ButtonCycle.Values.Add(float.PositiveInfinity);
+        ButtonCycle.Values.Add(20F);
+        ButtonCycle.Values.Add(10F);
+        ButtonCycle.Values.Add(5F);
+        ButtonCycle.Values.Add(2F);
+
+        // This generates protoflux to drive the context menu
+        // label and actually update dynamic variables
+        Slot ProtofluxSlot = ContextMenuSlot.AddSlot("protoflux", false);
+        ProtofluxSlot.Tag = null!;
+
+        // Context menu Label Drive
+
+        // string Input Node
+        var MenuStringInput = ProtofluxSlot.AttachComponent<ValueObjectInput<string>>();
+        MenuStringInput.Value.Value = "Culling Distance: ";
+
+        // Source Node
+        var DistValueSource = (ProtoFluxNode)ProtofluxSlot.AttachComponent(ProtoFluxHelper.GetSourceNode(typeof(float)));
+        ((ISource)DistValueSource).TrySetRootSource(DistValue.Value);
+
+        // ToString Node
+        var ToString = ProtofluxSlot.AttachComponent<ToString_Float>();
+        ToString.TryConnectInput(ToString.GetInput(0), DistValueSource.GetOutput(0), false, false);
+
+        // ValueAdd Node
+        var AddStrings = ProtofluxSlot.AttachComponent<ConcatenateString>();
+        AddStrings.TryConnectInput(AddStrings.GetInput(0), MenuStringInput.GetOutput(0), false, false);
+        AddStrings.TryConnectInput(AddStrings.GetInput(1), ToString.GetOutput(0), false, false);
+
+        // Object Field Drive<string> Node
+        var MenuLabelDrive = (ProtoFluxNode)ProtofluxSlot.AttachComponent(ProtoFluxHelper.GetDriverNode(typeof(string)));
+        MenuLabelDrive.TryConnectInput(MenuLabelDrive.GetInput(0), AddStrings.GetOutput(0), false, false);
+        ((IDrive)MenuLabelDrive).TrySetRootTarget(ItemSource.Label);
+
+        // Dynamic variable write on button event pressed
+        
+        // Button Events Node
+        var ButtonEvents = ProtofluxSlot.AttachComponent<ButtonEvents>();
+        var ButtonGlobalRef = ProtofluxSlot.AttachComponent<GlobalReference<IButton>>();
+        ButtonGlobalRef.Reference.Target = ItemSource;
+        ButtonEvents.Button.Target = ButtonGlobalRef;
+
+        // Root Slot Node
+        var RootSlotNode = ProtofluxSlot.AttachComponent<RootSlot>();
+
+        // string Input Node
+        var TargetSlotStringInput = ProtofluxSlot.AttachComponent<ValueObjectInput<string>>();
+        TargetSlotStringInput.Value.Value = "HeadlessCullingRoot";
+
+        // int Input Node
+        var SearchDepth = ProtofluxSlot.AttachComponent<ValueInput<int>>();
+        SearchDepth.Value.Value = 1;
+
+        // Find Child By Tag Node
+        var FindCullingRoot = ProtofluxSlot.AttachComponent<FindChildByTag>();
+        FindCullingRoot.TryConnectInput(FindCullingRoot.GetInput(0), RootSlotNode.GetOutput(0), false, false);
+        FindCullingRoot.TryConnectInput(FindCullingRoot.GetInput(1), TargetSlotStringInput.GetOutput(0), false, false);
+        FindCullingRoot.TryConnectInput(FindCullingRoot.GetInput(2), SearchDepth.GetOutput(0), false, false);
+
+        // string Input Node
+        var DynVarStringInput = ProtofluxSlot.AttachComponent<ValueObjectInput<string>>();
+        DynVarStringInput.Value.Value = "HeadlessUserCulling/CullingDistance";
+
+        // Write Dynamic float Node
+        var WriteDistVar = ProtofluxSlot.AttachComponent<WriteDynamicValueVariable<float>>();
+        WriteDistVar.TryConnectInput(WriteDistVar.GetInput(0), FindCullingRoot.GetOutput(0), false, false);
+        WriteDistVar.TryConnectInput(WriteDistVar.GetInput(1), DynVarStringInput.GetOutput(0), false, false);
+        WriteDistVar.TryConnectInput(WriteDistVar.GetInput(2), DistValueSource.GetOutput(0), false, false);
+
+        // This sets up a ref cast to assign the pressed field on button events
+        // because I cannot figure out how you're actually supposed to connect impulses
+        var RefCast = ProtofluxSlot.AttachComponent<ReferenceCast<WriteDynamicValueVariable<float>,ISyncNodeOperation>>();
+        RefCast.Source.Target = WriteDistVar;
+        RefCast.Target.Target = ButtonEvents.Pressed;
+
+        // Sets up the context menu to destroy itself when
+        // the user's culling root is destroyed
+        UserCullingSlot.Destroyed += d => { if (user != null && user.Root.Slot != null) ContextMenuSlot.Destroy(); };
     }
 }
