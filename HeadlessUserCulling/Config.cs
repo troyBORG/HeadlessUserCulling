@@ -9,4 +9,10 @@ public partial class HeadlessUserCulling : ResoniteMod
                 "Enable",
                 "Enable HeadlessAvatarCulling",
                 () => true);
+
+    [AutoRegisterConfigKey] public static readonly ModConfigurationKey<bool> AutoGenContextMenu =
+            new ModConfigurationKey<bool>(
+                "AutoGenContextMenu",
+                "Automatically generate context menus for culling settings",
+                () => false);
 }

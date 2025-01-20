@@ -157,6 +157,9 @@ public partial class HeadlessUserCulling : ResoniteMod
                 AudioOutput.MinScale.ActiveLink.ReleaseLink(true);
                 AudioOutput.MinScale.Value = 1F;
 
+                // Generates a context menu if the host decides to enable it
+                if (Config!.GetValue(AutoGenContextMenu)) InitializeContextMenu(user, CullingRoot);
+
                 // Causes the user's culled slots to regenerate if destroyed
                 UserCullingSlot.Destroyed += d => 
                 {
