@@ -43,9 +43,12 @@ public partial class HeadlessUserCulling : ResoniteMod
                 // Links the user active field to the distance component
                 // instead of writing it once to improve reliability,
                 // primarily for the user respawning.
-                var RefCast = UserCullingSlot.AttachComponent<ReferenceCast<Sync<bool>,IField<bool>>>();
-                RefCast.Source.Target = user.Root.Slot.ActiveSelf_Field;
-                RefCast.Target.Target = DistanceCheck.TargetField;
+                user.World.RunInUpdates(6, () =>
+                {
+                    var RefCast = UserCullingSlot.AttachComponent<ReferenceCast<Sync<bool>,IField<bool>>>();
+                    RefCast.Source.Target = user.Root.Slot.ActiveSelf_Field;
+                    RefCast.Target.Target = DistanceCheck.TargetField;
+                });
 
                 // Sets up a bool value driver to read the culled state and flip
                 // the value for other values to be enabled while the user is culled
@@ -155,10 +158,16 @@ public partial class HeadlessUserCulling : ResoniteMod
                 AudioOutput.MinScale.Value = 1F;
 
                 // Causes the user's culled slots to regenerate if destroyed
-                UserCullingSlot.Destroyed += d => { InitializeUser(user); };
+                UserCullingSlot.Destroyed += d => 
+                {
+                    user.World.RunInUpdates(3, ()=> 
+                    {
+                        if (user != null && user.Root.Slot != null) InitializeUser(user); 
+                    });
+                };
 
                 // Cuases thee user's culled slots to be deleted when the
-                // user's root slot is destroyed for whatever reason
+                // user's root slot is destroyed for any reason
                 user.Root.Slot.Destroyed += d => { UserCullingSlot.Destroy(); };
             }
         });
