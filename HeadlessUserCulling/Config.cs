@@ -14,5 +14,5 @@ public partial class HeadlessUserCulling : ResoniteMod
             new ModConfigurationKey<bool>(
                 "AutoGenContextMenu",
                 "Automatically generate context menus for culling settings",
-                () => false);
+                () => true);
 }

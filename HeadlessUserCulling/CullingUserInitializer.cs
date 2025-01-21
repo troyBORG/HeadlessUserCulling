@@ -157,9 +157,6 @@ public partial class HeadlessUserCulling : ResoniteMod
                 AudioOutput.MinScale.ActiveLink.ReleaseLink(true);
                 AudioOutput.MinScale.Value = 1F;
 
-                // Generates a context menu if the host decides to enable it
-                if (Config!.GetValue(AutoGenContextMenu)) InitializeContextMenu(user, UserCullingSlot);
-
                 // Causes the user's culled slots to regenerate if destroyed
                 UserCullingSlot.Destroyed += d => 
                 {
@@ -172,6 +169,9 @@ public partial class HeadlessUserCulling : ResoniteMod
                 // Cuases thee user's culled slots to be deleted when the
                 // user's root slot is destroyed for any reason
                 user.Root.Slot.Destroyed += d => { UserCullingSlot.Destroy(); };
+
+                // Generates a context menu if the host decides to enable it
+                if (Config!.GetValue(AutoGenContextMenu)) InitializeContextMenu(user, UserCullingSlot);
             }
         });
     }
