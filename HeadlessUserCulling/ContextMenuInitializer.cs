@@ -111,5 +111,8 @@ public partial class HeadlessUserCulling : ResoniteMod
         // Sets up the context menu to destroy itself when
         // the user's culling root is destroyed
         UserCullingSlot.Destroyed += d => { if (user != null && user.Root.Slot != null) ContextMenuSlot.Destroy(); };
+
+        // Regenerates the context menu if it's directly destroyed
+        ContextMenuSlot.Destroyed += d => { if (!UserCullingSlot.IsDestroyed) InitializeContextMenu(user, CullingRoot, UserCullingSlot); };
     }
 }

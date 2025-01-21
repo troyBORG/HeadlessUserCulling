@@ -167,11 +167,11 @@ public partial class HeadlessUserCulling : ResoniteMod
                     });
                 };
 
-                // Cuases thee user's culled slots to be deleted when the
+                // Causes the user's culled slots to be deleted when the
                 // user's root slot is destroyed for any reason
                 user.Root.Slot.Destroyed += d => { if (!UserCullingSlot.IsDestroyed) UserCullingSlot.Destroy(); };
 
-                // Generates a context menu if the host decides to enable it
+                // Generates a context menu if enabled in the mod config
                 if (Config!.GetValue(AutoGenContextMenu)) InitializeContextMenu(user, CullingRoot, UserCullingSlot);
             }
         });
