@@ -172,7 +172,7 @@ public partial class HeadlessUserCulling : ResoniteMod
                 user.Root.Slot.Destroyed += d => { if (!UserCullingSlot.IsDestroyed) UserCullingSlot.Destroy(); };
 
                 // Generates a context menu if the host decides to enable it
-                if (Config!.GetValue(AutoGenContextMenu)) InitializeContextMenu(user, UserCullingSlot);
+                if (Config!.GetValue(AutoGenContextMenu)) InitializeContextMenu(user, CullingRoot, UserCullingSlot);
             }
         });
     }

@@ -14,7 +14,7 @@ namespace HeadlessUserCulling;
 
 public partial class HeadlessUserCulling : ResoniteMod
 {
-    private static void InitializeContextMenu(User user, Slot UserCullingSlot)
+    private static void InitializeContextMenu(User user, Slot CullingRoot, Slot UserCullingSlot)
     {
         // Sets up context menu
         Slot ContextMenuSlot = user.Root.Slot.AddSlot("HeadlessCullingContextMenu", false);
@@ -28,7 +28,12 @@ public partial class HeadlessUserCulling : ResoniteMod
         // This holds the value that will be used to update
         // the dynamic variable through protoflux
         var DistValue = ContextMenuSlot.AttachComponent<ValueField<float>>();
-        DistValue.Value.Value = 10F;
+
+        // This fetches the dynamic variable to keep the distance value
+        // persistent between rejoins, respawns, and regenerations
+        Slot DistVarSlot = CullingRoot.GetChildrenWithTag("DistanceVar").First();
+        var DistVar = DistVarSlot.GetComponent<DynamicValueVariable<float>>();
+        DistValue.Value.DriveFrom(DistVar.Value, true);
 
         var ButtonCycle = ContextMenuSlot.AttachComponent<ButtonValueCycle<float>>();
         ButtonCycle.TargetValue.Target = DistValue.Value;

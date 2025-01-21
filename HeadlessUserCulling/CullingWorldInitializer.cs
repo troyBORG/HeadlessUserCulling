@@ -24,6 +24,7 @@ public partial class HeadlessUserCulling : ResoniteMod
 
                 // Setup Distance variable
                 Slot DistanceVarSlot = DynVarSlot.AddSlot("Distance", false);
+                DistanceVarSlot.Tag = "DistanceVar";
 
                 var DistanceDynVar = DistanceVarSlot.AttachComponent<DynamicValueVariable<float>>();
                 DistanceDynVar.VariableName.Value = "HeadlessUserCulling/CullingDistance";
