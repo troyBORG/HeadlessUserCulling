@@ -158,17 +158,18 @@ public partial class HeadlessUserCulling : ResoniteMod
                 AudioOutput.MinScale.Value = 1F;
 
                 // Causes the user's culled slots to regenerate if destroyed
+                Slot ThisUserRoot = user.Root.Slot;
                 UserCullingSlot.Destroyed += d => 
                 {
-                    user.World.RunInUpdates(3, ()=> 
+                    user.World.RunInUpdates(3, () => 
                     {
-                        if (user != null && user.Root.Slot != null) InitializeUser(user); 
+                        if (user != null && !ThisUserRoot.IsDestroyed) InitializeUser(user);
                     });
                 };
 
                 // Cuases thee user's culled slots to be deleted when the
                 // user's root slot is destroyed for any reason
-                user.Root.Slot.Destroyed += d => { UserCullingSlot.Destroy(); };
+                user.Root.Slot.Destroyed += d => { if (!UserCullingSlot.IsDestroyed) UserCullingSlot.Destroy(); };
 
                 // Generates a context menu if the host decides to enable it
                 if (Config!.GetValue(AutoGenContextMenu)) InitializeContextMenu(user, UserCullingSlot);
