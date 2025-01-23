@@ -23,6 +23,7 @@ public partial class HeadlessUserCulling : ResoniteMod
         ItemSource.Color.Value = colorX.Yellow;
 
         var RootItem = ContextMenuSlot.AttachComponent<RootContextMenuItem>();
+        RootItem.ExcludeOnTools.Value = true;
         RootItem.Item.Target = ItemSource;
 
         // This holds the value that will be used to update
