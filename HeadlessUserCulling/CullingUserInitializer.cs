@@ -17,6 +17,7 @@ public partial class HeadlessUserCulling : ResoniteMod
                 Slot CullingRoot = user.World.RootSlot.GetChildrenWithTag("HeadlessCullingRoot").First();
                 Slot UserCullingSlot = CullingRoot.AddSlot(user.UserName, false);
                 UserCullingSlot.Tag = null!;
+                Slot DistCheckSlot = UserCullingSlot.AddSlot("DistCheck", false);
                 Slot DynVarSlot = UserCullingSlot.AddSlot("DynVars", false);
                 Slot HelpersSlot = UserCullingSlot.AddSlot("Helpers", false);
 
@@ -26,7 +27,7 @@ public partial class HeadlessUserCulling : ResoniteMod
 
                 // Sets up the culling behavior via UserDistanceValueDriver, 
                 // CopyGlobalTransform, and CopyGlobalScale
-                var DistanceCheck = UserCullingSlot.AttachComponent<UserDistanceValueDriver<bool>>();
+                var DistanceCheck = DistCheckSlot.AttachComponent<UserDistanceValueDriver<bool>>();
                 DistanceCheck.Node.Value = UserRoot.UserNode.View;
                 DistanceCheck.NearValue.Value = true;
 
@@ -34,6 +35,9 @@ public partial class HeadlessUserCulling : ResoniteMod
                 // this override prevents weird issues on user spawn.
                 DistanceCheck.FarValue.OverrideForUser(user.World.HostUser, true);
 
+                // Keeps the root of the user's culling slots positioned and scaled
+                // at the user's root slot, this is the only transform that updates
+                // while the user is culled.
                 var CopyGlobalTransform = UserCullingSlot.AttachComponent<CopyGlobalTransform>();
                 CopyGlobalTransform.Source.Target = user.Root.Slot;
 
@@ -45,14 +49,14 @@ public partial class HeadlessUserCulling : ResoniteMod
                 // primarily for the user respawning.
                 user.World.RunInUpdates(6, () =>
                 {
-                    var RefCast = UserCullingSlot.AttachComponent<ReferenceCast<Sync<bool>,IField<bool>>>();
+                    var RefCast = DistCheckSlot.AttachComponent<ReferenceCast<Sync<bool>,IField<bool>>>();
                     RefCast.Source.Target = user.Root.Slot.ActiveSelf_Field;
                     RefCast.Target.Target = DistanceCheck.TargetField;
                 });
 
                 // Sets up a bool value driver to read the culled state and flip
                 // the value for other values to be enabled while the user is culled
-                var BoolFlip = UserCullingSlot.AttachComponent<BooleanValueDriver<bool>>();
+                var BoolFlip = DistCheckSlot.AttachComponent<BooleanValueDriver<bool>>();
                 BoolFlip.State.DriveFrom(user.Root.Slot.ActiveSelf_Field);
                 BoolFlip.TargetField.Value = HelpersSlot.ActiveSelf_Field.ReferenceID;
                 BoolFlip.FalseValue.Value = true;
@@ -136,6 +140,16 @@ public partial class HeadlessUserCulling : ResoniteMod
                 var RightHandRotDriver = RightHandVisualSlot.AttachComponent<ValueDriver<floatQ>>();
                 RightHandRotDriver.ValueSource.Target = RightHandRotStream;
                 RightHandRotDriver.DriveTarget.Target = RightHandVisualSlot.Rotation_Field;
+
+                // Positions strictly the distance check at the user's head
+                // via value streams to keep the distance check comparing between
+                // one your user's head to another user's head.
+                // This is placed later so I can reuse the existing
+                // stream var, which isn't declared yet where I would've
+                // preferred to include this.
+                var DistCheckPosDriver = DistCheckSlot.AttachComponent<ValueDriver<float3>>();
+                DistCheckPosDriver.ValueSource.Target = HeadPosStream;
+                DistCheckPosDriver.DriveTarget.Target = DistCheckSlot.Position_Field;
 
                 // Recreates the Audio Output on the user
                 // to keep audio working while a user is culled
