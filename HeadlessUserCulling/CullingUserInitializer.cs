@@ -63,9 +63,7 @@ public partial class HeadlessUserCulling : ResoniteMod
                 BoolFlip.TrueValue.DriveFrom(DistanceCheck.FarValue);
 
                 // Sets up dyn vars to be adjustable by the user
-                Slot DistanceVarSlot = DynVarSlot.AddSlot("Distance", false);
-
-                var DistanceDriver = DistanceVarSlot.AttachComponent<DynamicValueVariableDriver<float>>();
+                var DistanceDriver = DynVarSlot.AttachComponent<DynamicValueVariableDriver<float>>();
                 DistanceDriver.VariableName.Value = "HeadlessUserCulling/CullingDistance";
                 DistanceDriver.Target.Target = DistanceCheck.Distance;
 
