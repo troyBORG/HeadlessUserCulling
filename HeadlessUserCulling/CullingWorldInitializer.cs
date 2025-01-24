@@ -22,8 +22,16 @@ public partial class HeadlessUserCulling : ResoniteMod
                 var DynVarSpace = CullingRoot.AttachComponent<DynamicVariableSpace>();
                 DynVarSpace.SpaceName.Value = "HeadlessUserCulling";
 
-                // Setup Distance variable
-                Slot DistanceVarSlot = DynVarSlot.AddSlot("Distance", false);
+                // Setup HeadlessCullingRoot variable
+                Slot RootVarSlot = DynVarSlot.AddSlot("HeadlessCullingRoot", false);
+
+                var RootDynVar = RootVarSlot.AttachComponent<DynamicReferenceVariable<Slot>>();
+                RootDynVar.VariableName.Value = "World/HeadlessCullingRoot";
+                RootDynVar.Reference.Target = CullingRoot;
+                RootDynVar.Reference.DriveFrom(RootDynVar.Reference);
+
+                // Setup CullingDistance variable
+                Slot DistanceVarSlot = DynVarSlot.AddSlot("CullingDistance", false);
                 DistanceVarSlot.Tag = "DistanceVar";
 
                 var DistanceDynVar = DistanceVarSlot.AttachComponent<DynamicValueVariable<float>>();
