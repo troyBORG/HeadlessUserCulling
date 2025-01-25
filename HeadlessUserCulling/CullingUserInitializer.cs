@@ -68,7 +68,6 @@ public partial class HeadlessUserCulling : ResoniteMod
                 DistanceDriver.Target.Target = DistanceCheck.Distance;
 
                 // Generates visuals for culled user's head and hands
-                Slot VisualSlot = HelpersSlot.AddSlot("Visuals", false);
 
                 // Gets the default pbs metallic to avoid duplicating materials
                 var DefaultMaterial = user.World.GetSharedComponentOrCreate("DefaultMaterial", delegate(PBS_Metallic mat) {});
@@ -77,7 +76,7 @@ public partial class HeadlessUserCulling : ResoniteMod
                 // the user to drive the position and rotation of the culled visuals
 
                 // Head visual setup
-                Slot HeadVisualSlot = VisualSlot.AddSlot("HeadVisual", false);
+                Slot HeadVisualSlot = HelpersSlot.AddSlot("HeadVisual", false);
 
                 Slot HeadMeshSlot = HeadVisualSlot.AddSlot("Mesh", false);
                 HeadMeshSlot.Rotation_Field.Value = floatQ.Euler(90F, 180F, 180F);
@@ -98,7 +97,7 @@ public partial class HeadlessUserCulling : ResoniteMod
                 HeadRotDriver.DriveTarget.Target = HeadVisualSlot.Rotation_Field;
 
                 // Left hand visual setup
-                Slot LeftHandVisualSlot = VisualSlot.AddSlot("LeftHandVisual", false);
+                Slot LeftHandVisualSlot = HelpersSlot.AddSlot("LeftHandVisual", false);
 
                 Slot LeftHandMeshSlot = LeftHandVisualSlot.AddSlot("Mesh", false);
                 LeftHandMeshSlot.Rotation_Field.Value = floatQ.Euler(90F, 180F, 180F);
@@ -119,7 +118,7 @@ public partial class HeadlessUserCulling : ResoniteMod
                 LeftHandRotDriver.DriveTarget.Target = LeftHandVisualSlot.Rotation_Field;
 
                 // Right hand visual setup
-                Slot RightHandVisualSlot = VisualSlot.AddSlot("RightHandVisual", false);
+                Slot RightHandVisualSlot = HelpersSlot.AddSlot("RightHandVisual", false);
 
                 Slot RightHandMeshSlot = RightHandVisualSlot.AddSlot("Mesh", false);
                 RightHandMeshSlot.Rotation_Field.Value = floatQ.Euler(90F, 180F, 180F);
@@ -138,6 +137,22 @@ public partial class HeadlessUserCulling : ResoniteMod
                 var RightHandRotDriver = RightHandVisualSlot.AttachComponent<ValueDriver<floatQ>>();
                 RightHandRotDriver.ValueSource.Target = RightHandRotStream;
                 RightHandRotDriver.DriveTarget.Target = RightHandVisualSlot.Rotation_Field;
+
+                // Mimics the default nameplate to keep consistency
+                Slot NameplateSlot = HelpersSlot.AddSlot("Nameplate", false);
+                var NameplatePosDriver = NameplateSlot.AttachComponent<ValueDriver<float3>>();
+                NameplatePosDriver.ValueSource.Target = HeadPosStream;
+                NameplatePosDriver.DriveTarget.Target = NameplateSlot.Position_Field;
+
+                Slot NameBadgeSlot = NameplateHelper.SetupDefaultNameBadge(NameplateSlot, user);
+                NameBadgeSlot.GetComponent<AvatarNameTagAssigner>().UpdateTags(user.Root.Slot.GetComponentInChildren<AvatarManager>());
+                NameBadgeSlot.GetComponent<ContactLink>().UserId.Value = user.UserID;
+                NameBadgeSlot.GetComponent<PositionAtUser>().Destroy();
+                NameBadgeSlot.Position_Field.Value = new float3(0F, 0.35F, 0F);
+
+                Slot LiveIndicatorSlot = NameplateHelper.SetupDefaultLiveIndicator(NameplateSlot, user);
+                LiveIndicatorSlot.GetComponent<PositionAtUser>().Destroy();
+                LiveIndicatorSlot.Position_Field.Value = new float3(0F, 0.55F, 0F);
 
                 // Positions strictly the distance check at the user's head
                 // via value streams to keep the distance check comparing between
