@@ -59,6 +59,8 @@ After this, the dynamic variable drivers are setup, this is what allows the user
 
 Now here's where we solve some problems. Disabling the user's root slot disallows us from seeing or hearing them, which is where the culled audio and visuals come in. Another slot is created which will hold a few more slots, that being for the head, the left hand, and the right hand culled visuals. Procedural meshes are setup on these slots which will give you an approximation of a user's movements while they're culled.
 
+It may not be clear who the culled user is, so a nameplate is generated. Including the live indicator.
+
 Finally, a new slot is created underneath the culled head visual, and an audio output is setup mimicking the audio outputs that are found on avatars. The audio output is then supplied the user's audio stream.
 
 The end result is a collection of slots that's independent of a user's slots that positions itself at the user, handles variables and distance checks for you, and provides fallback audio and visuals when they are culled.
