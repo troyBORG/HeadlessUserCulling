@@ -1,3 +1,4 @@
+using Elements.Assets;
 using Elements.Core;
 using FrooxEngine;
 using FrooxEngine.CommonAvatar;
@@ -79,12 +80,23 @@ public partial class HeadlessUserCulling : ResoniteMod
                 Slot HeadVisualSlot = HelpersSlot.AddSlot("HeadVisual", false);
 
                 Slot HeadMeshSlot = HeadVisualSlot.AddSlot("Mesh", false);
-                HeadMeshSlot.Rotation_Field.Value = floatQ.Euler(90F, 180F, 180F);
-                var HeadMesh = HeadMeshSlot.AttachMesh<ConeMesh>(DefaultMaterial, false);
-                HeadMesh.Height.Value = 0.25F;
-                HeadMesh.RadiusBase.Value = 0.15F;
-                HeadMesh.Sides.Value = 3;
-                HeadMesh.FlatShading.Value = true;
+
+                var UserInfo = HeadMeshSlot.AttachComponent<CloudUserInfo>();
+                UserInfo.UserId.Value = user.UserID;
+                var UserIconURL = UserInfo.IconURL;
+
+                var UserIcon = HeadMeshSlot.AttachComponent<StaticTexture2D>();
+                UserIcon.URL.DriveFrom(UserIconURL);
+
+                var HeadMat = HeadMeshSlot.AttachComponent<UnlitMaterial>();
+                HeadMat.Texture.Target = UserIcon;
+                HeadMat.TextureScale.Value = new float2(-1F, 1F);
+                HeadMat.BlendMode.Value = BlendMode.Cutout;
+                HeadMat.Sidedness.Value = Sidedness.Double;
+
+                var HeadMesh = HeadMeshSlot.AttachMesh<CurvedPlaneMesh>(HeadMat, false);
+                HeadMesh.Size.Value = new float2(0.5F, 0.5F);
+                HeadMesh.Curvature.Value = 0.75F;
 
                 var HeadPosStream = user.GetStream<ValueStream<float3>>(s => s.Name == "Head");
                 var HeadPosDriver = HeadVisualSlot.AttachComponent<ValueDriver<float3>>();
