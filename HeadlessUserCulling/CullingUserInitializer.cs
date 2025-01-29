@@ -150,16 +150,24 @@ public partial class HeadlessUserCulling : ResoniteMod
                 RightHandRotDriver.ValueSource.Target = RightHandRotStream;
                 RightHandRotDriver.DriveTarget.Target = RightHandVisualSlot.Rotation_Field;
 
-                // Mimics the default nameplate to keep consistency
+                // Mimics the default nameplate to keep consistency, but it's not 1:1
                 Slot NameplateSlot = HelpersSlot.AddSlot("Nameplate", false);
                 var NameplatePosDriver = NameplateSlot.AttachComponent<ValueDriver<float3>>();
                 NameplatePosDriver.ValueSource.Target = HeadPosStream;
                 NameplatePosDriver.DriveTarget.Target = NameplateSlot.Position_Field;
 
                 Slot NameBadgeSlot = NameplateHelper.SetupDefaultNameBadge(NameplateSlot, user);
-                NameBadgeSlot.GetComponent<AvatarNameTagAssigner>().UpdateTags(user.Root.Slot.GetComponentInChildren<AvatarManager>());
+
+                var NameTagAssigner = NameBadgeSlot.GetComponent<AvatarNameTagAssigner>();
+                NameTagAssigner.UpdateTags(user.Root.Slot.GetComponentInChildren<AvatarManager>());
+                NameTagAssigner.UserIdTargets.Clear();
+                NameTagAssigner.ColorTargets.Clear();
+                NameTagAssigner.OutlineTargets.Clear();
+
                 NameBadgeSlot.GetComponent<ContactLink>().UserId.Value = user.UserID;
+
                 NameBadgeSlot.GetComponent<PositionAtUser>().Destroy();
+
                 NameBadgeSlot.Position_Field.Value = new float3(0F, 0.35F, 0F);
 
                 Slot LiveIndicatorSlot = NameplateHelper.SetupDefaultLiveIndicator(NameplateSlot, user);
