@@ -12,9 +12,10 @@ public partial class HeadlessUserCulling : ResoniteMod
     {
         user.World.RunSynchronously(() => 
         {
-            if (user != user.World.HostUser)
+            if (!user.IsDestroyed && !user.World.IsDestroyed && user != user.World.HostUser)
             {
                 // Create and setup user specific culling slots
+                Slot ThisUserRoot = user.Root.Slot;
                 Slot CullingRoot = user.World.RootSlot.GetChildrenWithTag("HeadlessCullingRoot").First();
                 Slot UserCullingSlot = CullingRoot.AddSlot(user.UserName, false);
                 UserCullingSlot.Tag = null!;
@@ -40,25 +41,28 @@ public partial class HeadlessUserCulling : ResoniteMod
                 // at the user's root slot, this is the only transform that updates
                 // while the user is culled.
                 var CopyGlobalTransform = UserCullingSlot.AttachComponent<CopyGlobalTransform>();
-                CopyGlobalTransform.Source.Target = user.Root.Slot;
+                CopyGlobalTransform.Source.Target = ThisUserRoot;
 
                 var CopyGlobalScale = UserCullingSlot.AttachComponent<CopyGlobalScale>();
-                CopyGlobalScale.Source.Target = user.Root.Slot;
+                CopyGlobalScale.Source.Target = ThisUserRoot;
                 
                 // Links the user active field to the distance component
                 // instead of writing it once to improve reliability,
                 // primarily for the user respawning.
                 user.World.RunInUpdates(6, () =>
                 {
-                    var RefCast = DistCheckSlot.AttachComponent<ReferenceCast<Sync<bool>,IField<bool>>>();
-                    RefCast.Source.Target = user.Root.Slot.ActiveSelf_Field;
-                    RefCast.Target.Target = DistanceCheck.TargetField;
+                    if (!ThisUserRoot.IsDestroyed && !DistanceCheck.IsDestroyed)
+                    {
+                        var RefCast = DistCheckSlot.AttachComponent<ReferenceCast<Sync<bool>,IField<bool>>>();
+                        RefCast.Source.Target = ThisUserRoot.ActiveSelf_Field;
+                        RefCast.Target.Target = DistanceCheck.TargetField;
+                    }
                 });
 
                 // Sets up a bool value driver to read the culled state and flip
                 // the value for other values to be enabled while the user is culled
                 var BoolFlip = DistCheckSlot.AttachComponent<BooleanValueDriver<bool>>();
-                BoolFlip.State.DriveFrom(user.Root.Slot.ActiveSelf_Field);
+                BoolFlip.State.DriveFrom(ThisUserRoot.ActiveSelf_Field);
                 BoolFlip.TargetField.Value = HelpersSlot.ActiveSelf_Field.ReferenceID;
                 BoolFlip.FalseValue.Value = true;
                 BoolFlip.TrueValue.DriveFrom(DistanceCheck.FarValue);
@@ -99,14 +103,20 @@ public partial class HeadlessUserCulling : ResoniteMod
                 HeadMesh.Curvature.Value = 0.75F;
 
                 var HeadPosStream = user.GetStream<ValueStream<float3>>(s => s.Name == "Head");
-                var HeadPosDriver = HeadVisualSlot.AttachComponent<ValueDriver<float3>>();
-                HeadPosDriver.ValueSource.Target = HeadPosStream;
-                HeadPosDriver.DriveTarget.Target = HeadVisualSlot.Position_Field;
+                if (HeadPosStream != null)
+                {
+                    var HeadPosDriver = HeadVisualSlot.AttachComponent<ValueDriver<float3>>();
+                    HeadPosDriver.ValueSource.Target = HeadPosStream;
+                    HeadPosDriver.DriveTarget.Target = HeadVisualSlot.Position_Field;
+                }
 
                 var HeadRotStream = user.GetStream<ValueStream<floatQ>>(s => s.Name == "Head");
-                var HeadRotDriver = HeadVisualSlot.AttachComponent<ValueDriver<floatQ>>();
-                HeadRotDriver.ValueSource.Target = HeadRotStream;
-                HeadRotDriver.DriveTarget.Target = HeadVisualSlot.Rotation_Field;
+                if (HeadRotStream != null)
+                {
+                    var HeadRotDriver = HeadVisualSlot.AttachComponent<ValueDriver<floatQ>>();
+                    HeadRotDriver.ValueSource.Target = HeadRotStream;
+                    HeadRotDriver.DriveTarget.Target = HeadVisualSlot.Rotation_Field;
+                }
 
                 // Left hand visual setup
                 Slot LeftHandVisualSlot = HelpersSlot.AddSlot("LeftHandVisual", false);
@@ -120,14 +130,20 @@ public partial class HeadlessUserCulling : ResoniteMod
                 LeftHandMesh.FlatShading.Value = true;
 
                 var LeftHandPosStream = user.GetStream<ValueStream<float3>>(s => s.Name == "LeftHand");
-                var LeftHandPosDriver = LeftHandVisualSlot.AttachComponent<ValueDriver<float3>>();
-                LeftHandPosDriver.ValueSource.Target = LeftHandPosStream;
-                LeftHandPosDriver.DriveTarget.Target = LeftHandVisualSlot.Position_Field;
+                if (LeftHandPosStream != null)
+                {
+                    var LeftHandPosDriver = LeftHandVisualSlot.AttachComponent<ValueDriver<float3>>();
+                    LeftHandPosDriver.ValueSource.Target = LeftHandPosStream;
+                    LeftHandPosDriver.DriveTarget.Target = LeftHandVisualSlot.Position_Field;
+                }
                 
                 var LeftHandRotStream = user.GetStream<ValueStream<floatQ>>(s => s.Name == "LeftHand");
-                var LeftHandRotDriver = LeftHandVisualSlot.AttachComponent<ValueDriver<floatQ>>();
-                LeftHandRotDriver.ValueSource.Target = LeftHandRotStream;
-                LeftHandRotDriver.DriveTarget.Target = LeftHandVisualSlot.Rotation_Field;
+                if (LeftHandRotStream != null)
+                {
+                    var LeftHandRotDriver = LeftHandVisualSlot.AttachComponent<ValueDriver<floatQ>>();
+                    LeftHandRotDriver.ValueSource.Target = LeftHandRotStream;
+                    LeftHandRotDriver.DriveTarget.Target = LeftHandVisualSlot.Rotation_Field;
+                }
 
                 // Right hand visual setup
                 Slot RightHandVisualSlot = HelpersSlot.AddSlot("RightHandVisual", false);
@@ -141,25 +157,31 @@ public partial class HeadlessUserCulling : ResoniteMod
                 RightHandMesh.FlatShading.Value = true;
 
                 var RightHandPosStream = user.GetStream<ValueStream<float3>>(s => s.Name == "RightHand");
-                var RightHandPosDriver = RightHandVisualSlot.AttachComponent<ValueDriver<float3>>();
-                RightHandPosDriver.ValueSource.Target = RightHandPosStream;
-                RightHandPosDriver.DriveTarget.Target = RightHandVisualSlot.Position_Field;
+                if (RightHandPosStream != null)
+                {
+                    var RightHandPosDriver = RightHandVisualSlot.AttachComponent<ValueDriver<float3>>();
+                    RightHandPosDriver.ValueSource.Target = RightHandPosStream;
+                    RightHandPosDriver.DriveTarget.Target = RightHandVisualSlot.Position_Field;
+                }
 
                 var RightHandRotStream = user.GetStream<ValueStream<floatQ>>(s => s.Name == "RightHand");
-                var RightHandRotDriver = RightHandVisualSlot.AttachComponent<ValueDriver<floatQ>>();
-                RightHandRotDriver.ValueSource.Target = RightHandRotStream;
-                RightHandRotDriver.DriveTarget.Target = RightHandVisualSlot.Rotation_Field;
+                if (RightHandRotStream != null)
+                {
+                    var RightHandRotDriver = RightHandVisualSlot.AttachComponent<ValueDriver<floatQ>>();
+                    RightHandRotDriver.ValueSource.Target = RightHandRotStream;
+                    RightHandRotDriver.DriveTarget.Target = RightHandVisualSlot.Rotation_Field;
+                }
 
                 // Mimics the default nameplate to keep consistency, but it's not 1:1
                 Slot NameplateSlot = HelpersSlot.AddSlot("Nameplate", false);
                 var NameplatePosDriver = NameplateSlot.AttachComponent<ValueDriver<float3>>();
-                NameplatePosDriver.ValueSource.Target = HeadPosStream;
+                if (HeadPosStream != null) NameplatePosDriver.ValueSource.Target = HeadPosStream;
                 NameplatePosDriver.DriveTarget.Target = NameplateSlot.Position_Field;
 
                 Slot NameBadgeSlot = NameplateHelper.SetupDefaultNameBadge(NameplateSlot, user);
 
                 var NameTagAssigner = NameBadgeSlot.GetComponent<AvatarNameTagAssigner>();
-                NameTagAssigner.UpdateTags(user.Root.Slot.GetComponentInChildren<AvatarManager>());
+                NameTagAssigner.UpdateTags(ThisUserRoot.GetComponentInChildren<AvatarManager>());
                 NameTagAssigner.UserIdTargets.Clear();
                 NameTagAssigner.ColorTargets.Clear();
                 NameTagAssigner.OutlineTargets.Clear();
@@ -181,12 +203,12 @@ public partial class HeadlessUserCulling : ResoniteMod
                 // stream var, which isn't declared yet where I would've
                 // preferred to include this.
                 var DistCheckPosDriver = DistCheckSlot.AttachComponent<ValueDriver<float3>>();
-                DistCheckPosDriver.ValueSource.Target = HeadPosStream;
+                if (HeadPosStream != null) DistCheckPosDriver.ValueSource.Target = HeadPosStream;
                 DistCheckPosDriver.DriveTarget.Target = DistCheckSlot.Position_Field;
 
                 // Recreates the Audio Output on the user
                 // to keep audio working while a user is culled
-                var UserVoice = user.Root.Slot.GetComponent<AvatarVoiceInfo>().AudioSource.Value;
+                var UserVoice = ThisUserRoot.GetComponent<AvatarVoiceInfo>().AudioSource.Value;
 
                 Slot AudioSlot = HeadVisualSlot.AddSlot("Audio", false);
 
@@ -197,7 +219,7 @@ public partial class HeadlessUserCulling : ResoniteMod
 
                 var AudioManager = AudioSlot.AttachComponent<AvatarAudioOutputManager>();
                 AudioManager.AudioOutput.Target = AudioOutput;
-                AudioManager.OnEquip(user.Root.Slot.GetComponentInChildren<AvatarObjectSlot>());
+                AudioManager.OnEquip(ThisUserRoot.GetComponentInChildren<AvatarObjectSlot>());
 
                 // This is needed because otherwise, the min scale will
                 // be set to Infinity, making the audio output not work
@@ -205,18 +227,23 @@ public partial class HeadlessUserCulling : ResoniteMod
                 AudioOutput.MinScale.Value = 1F;
 
                 // Causes the user's culled slots to regenerate if destroyed
-                Slot ThisUserRoot = user.Root.Slot;
                 UserCullingSlot.Destroyed += d => 
                 {
-                    user.World.RunInUpdates(3, () => 
+                    if (!user.IsDestroyed)
                     {
-                        if (user != null && !ThisUserRoot.IsDestroyed) InitializeUser(user);
-                    });
+                        user.World.RunInUpdates(3, () => 
+                        {
+                            if (!user.IsDestroyed && !ThisUserRoot.IsDestroyed) InitializeUser(user);
+                        });
+                    }
                 };
 
                 // Causes the user's culled slots to be deleted when the
                 // user's root slot is destroyed for any reason
-                user.Root.Slot.Destroyed += d => { if (!UserCullingSlot.IsDestroyed) UserCullingSlot.Destroy(); };
+                ThisUserRoot.Destroyed += d =>
+                {
+                    if (!UserCullingSlot.IsDestroyed) UserCullingSlot.Destroy();
+                };
 
                 // Generates a context menu if enabled in the mod config
                 if (Config!.GetValue(AutoGenContextMenu)) InitializeContextMenu(user, CullingRoot, UserCullingSlot);
