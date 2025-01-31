@@ -1,8 +1,8 @@
-using Elements.Assets;
 using Elements.Core;
 using FrooxEngine;
 using FrooxEngine.CommonAvatar;
 using ResoniteModLoader;
+using System.Reflection;
 
 namespace HeadlessUserCulling;
 
@@ -221,10 +221,8 @@ public partial class HeadlessUserCulling : ResoniteMod
                 AudioManager.AudioOutput.Target = AudioOutput;
                 AudioManager.OnEquip(ThisUserRoot.GetComponentInChildren<AvatarObjectSlot>());
 
-                // This is needed because otherwise, the min scale will
-                // be set to Infinity, making the audio output not work
-                AudioOutput.MinScale.ActiveLink.ReleaseLink(true);
-                AudioOutput.MinScale.Value = 1F;
+                // Sets the scale compensation to 1 to prevent the culled audio from breaking
+                ((Sync<float>)AudioManager.GetType().GetField("_scaleCompensation", BindingFlags.Instance | BindingFlags.NonPublic)!.GetValue(AudioManager)!).Value = 1.0F;
 
                 // Causes the user's culled slots to regenerate if destroyed
                 UserCullingSlot.Destroyed += d => 
