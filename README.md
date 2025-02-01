@@ -6,6 +6,11 @@ A [ResoniteModLoader](https://github.com/resonite-modding-group/ResoniteModLoade
 - [Headless Client](https://wiki.resonite.com/Headless_Server_Software)
 - [ResoniteModLoader](https://github.com/resonite-modding-group/ResoniteModLoader)
 
+## Installation
+1. Install [ResoniteModLoader](https://github.com/resonite-modding-group/ResoniteModLoader).
+2. Place [HeadlessUserCulling.dll](https://github.com/Raidriar796/HeadlessUserCulling/releases/download/1.0.0/HeadlessUserCulling.dll) into your `rml_mods` folder inside of the headless installation. You can create it if it's missing, or if you launch the client once with ResoniteModLoader installed it will create the folder for you.
+3. Start the client. If you want to verify that the mod is working you can check the headless client's logs.
+
 ## Config Options
 
 - `Enabled`
