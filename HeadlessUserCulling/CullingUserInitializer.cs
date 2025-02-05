@@ -1,6 +1,10 @@
 using Elements.Core;
 using FrooxEngine;
 using FrooxEngine.CommonAvatar;
+using FrooxEngine.ProtoFlux;
+using FrooxEngine.ProtoFlux.CoreNodes;
+using FrooxEngine.ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Slots;
+using FrooxEngine.ProtoFlux.Runtimes.Execution.Nodes.Operators;
 using ResoniteModLoader;
 using System.Reflection;
 
@@ -22,6 +26,7 @@ public partial class HeadlessUserCulling : ResoniteMod
                 Slot DistCheckSlot = UserCullingSlot.AddSlot("DistCheck", false);
                 Slot DynVarSlot = UserCullingSlot.AddSlot("DynVars", false);
                 Slot HelpersSlot = UserCullingSlot.AddSlot("Helpers", false);
+                Slot ProtofluxSlot = UserCullingSlot.AddSlot("<i><b>protoflu(x)", false);
 
                 // Prevents the user from culling themselves
                 var UserOverride = UserCullingSlot.ActiveSelf_Field.OverrideForUser(user, false);
@@ -59,13 +64,39 @@ public partial class HeadlessUserCulling : ResoniteMod
                     }
                 });
 
-                // Sets up a bool value driver to read the culled state and flip
-                // the value for other values to be enabled while the user is culled
-                var BoolFlip = DistCheckSlot.AttachComponent<BooleanValueDriver<bool>>();
-                BoolFlip.State.DriveFrom(ThisUserRoot.ActiveSelf_Field);
-                BoolFlip.TargetField.Value = HelpersSlot.ActiveSelf_Field.ReferenceID;
-                BoolFlip.FalseValue.Value = true;
-                BoolFlip.TrueValue.DriveFrom(DistanceCheck.FarValue);
+                // Makes sure the helpers are only shown when the user's parents aren't disabled.
+                // If a slot the user is parented under is disabled, the helpers should also
+                // be disabled, this also improves compatibility with zone culling
+                
+                // ChangeableSource node
+                var ElementSource = (ProtoFluxNode)ProtofluxSlot.AttachComponent(ProtoFluxHelper.GetSourceNode(typeof(Slot)));
+                ((ISource)ElementSource).TrySetRootSource(ThisUserRoot);
+
+                // Get Slot Active Self node
+                var GetSlotActiveSelf = ProtofluxSlot.AttachComponent<GetSlotActiveSelf>();
+                GetSlotActiveSelf.TryConnectInput(GetSlotActiveSelf.GetInput(0), ElementSource.GetOutput(0), false, false);
+
+                // NOT node
+                var NOT_Bool = ProtofluxSlot.AttachComponent<NOT_Bool>();
+                NOT_Bool.TryConnectInput(NOT_Bool.GetInput(0), GetSlotActiveSelf.GetOutput(0), false, false);
+
+                // Get Parent Slot node
+                var GetParent = ProtofluxSlot.AttachComponent<GetParentSlot>();
+                GetParent.TryConnectInput(GetParent.GetInput(0), ElementSource.GetOutput(0), false, false);
+
+                // Get Slot Active node
+                var GetSlotActive = ProtofluxSlot.AttachComponent<GetSlotActive>();
+                GetSlotActive.TryConnectInput(GetSlotActive.GetInput(0), GetParent.GetOutput(0), false, false);
+
+                // AND node
+                var AND_Bool = ProtofluxSlot.AttachComponent<AND_Bool>();
+                AND_Bool.TryConnectInput(AND_Bool.GetInput(0), NOT_Bool.GetOutput(0), false, false);
+                AND_Bool.TryConnectInput(AND_Bool.GetInput(1), GetSlotActive, false, false);
+
+                // Value Field Drive<bool> node
+                var HelpersSlotDrive = (ProtoFluxNode)ProtofluxSlot.AttachComponent(ProtoFluxHelper.GetDriverNode(typeof(bool)));
+                HelpersSlotDrive.TryConnectInput(HelpersSlotDrive.GetInput(0), AND_Bool.GetOutput(0), false, false);
+                ((IDrive)HelpersSlotDrive).TrySetRootTarget(HelpersSlot.ActiveSelf_Field);
 
                 // Sets up dyn vars to be adjustable by the user
                 var DistanceDriver = DynVarSlot.AttachComponent<DynamicValueVariableDriver<float>>();

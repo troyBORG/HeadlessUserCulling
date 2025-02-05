@@ -38,5 +38,9 @@
       <HintPath>$(ResonitePath)Elements.Assets.dll</HintPath>
       <Private>false</Private>
     </Reference>
+    <Reference Include="ProtoFluxBindings">
+      <HintPath>$(ResonitePath)ProtoFluxBindings.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
   </ItemGroup>
 </Project>
