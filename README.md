@@ -45,11 +45,7 @@ A [ResoniteModLoader](https://github.com/resonite-modding-group/ResoniteModLoade
 
 If you want to integrate the culling system's settings into your world, the following dynamic variables are provided, but make sure `AutoGenContextMenu` is set to false:
 
-- `World/HeadlessCullingRoot`
-  - Slot Reference
-  - Read Only
-
-- `HeadlessUserCulling/CullingDistance`
+- `World/CullingDistance`
   - Float Value
   - Read/Write
   - Local Overrides
