@@ -7,7 +7,7 @@ public partial class HeadlessUserCulling : ResoniteMod
 {
     public override string Name => "HeadlessUserCulling";
     public override string Author => "Raidriar796";
-    public override string Version => "1.0.0";
+    public override string Version => "1.1.0";
     public override string Link => "https://github.com/Raidriar796/HeadlessUserCulling";
     public static ModConfiguration? Config;
 
