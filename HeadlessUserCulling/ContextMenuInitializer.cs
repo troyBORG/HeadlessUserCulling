@@ -22,7 +22,7 @@ public partial class HeadlessUserCulling : ResoniteMod
 
             var StringDriver = ContextMenuSlot.AttachComponent<MultiValueTextFormatDriver>();
             StringDriver.Sources.Add(DistVar.Value);
-            StringDriver.Format.Value = "Culling Distance: {0}m";
+            StringDriver.Format.Value = "Culling Distance: {0}";
             StringDriver.Text.Target = ItemSource.Label;
 
             var RootItem = ContextMenuSlot.AttachComponent<RootContextMenuItem>();
