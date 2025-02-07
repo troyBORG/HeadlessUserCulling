@@ -3,7 +3,9 @@ using FrooxEngine;
 using FrooxEngine.CommonAvatar;
 using FrooxEngine.ProtoFlux;
 using FrooxEngine.ProtoFlux.CoreNodes;
+using FrooxEngine.ProtoFlux.Runtimes.Execution.Nodes;
 using FrooxEngine.ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Slots;
+using FrooxEngine.ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Users;
 using FrooxEngine.ProtoFlux.Runtimes.Execution.Nodes.Operators;
 using ResoniteModLoader;
 using System.Reflection;
@@ -255,6 +257,25 @@ public partial class HeadlessUserCulling : ResoniteMod
 
                 // Sets the scale compensation to 1 to prevent the culled audio from breaking
                 ((Sync<float>)AudioManager.GetType().GetField("_scaleCompensation", BindingFlags.Instance | BindingFlags.NonPublic)!.GetValue(AudioManager)!).Value = 1.0F;
+
+                // Sets up the audio slot to be disabled when the user is silenced
+
+                // User Input node
+                var UserInput = ProtofluxSlot.AttachComponent<RefObjectInput<User>>();
+                UserInput.Target.Target = user;
+
+                // Is User Silenced node
+                var IsUserSilenced = ProtofluxSlot.AttachComponent<IsUserSilenced>();
+                IsUserSilenced.TryConnectInput(IsUserSilenced.GetInput(0), UserInput.GetOutput(0), false, false);
+
+                // NOT node
+                var NOT_Bool_2 = ProtofluxSlot.AttachComponent<NOT_Bool>();
+                NOT_Bool_2.TryConnectInput(NOT_Bool_2.GetInput(0), IsUserSilenced.GetOutput(0), false, false);
+                
+                // Value Field Drive<bool> node
+                var AudioSlotDrive = (ProtoFluxNode)ProtofluxSlot.AttachComponent(ProtoFluxHelper.GetDriverNode(typeof(bool)));
+                AudioSlotDrive.TryConnectInput(AudioSlotDrive.GetInput(0), NOT_Bool_2.GetOutput(0), false, false);
+                ((IDrive)AudioSlotDrive).TrySetRootTarget(AudioSlot.ActiveSelf_Field);
 
                 // Causes the user's culled slots to regenerate if destroyed
                 UserCullingSlot.Destroyed += d => 
