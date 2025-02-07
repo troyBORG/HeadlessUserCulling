@@ -102,6 +102,7 @@ public partial class HeadlessUserCulling : ResoniteMod
                 var DistanceDriver = DynVarSlot.AttachComponent<DynamicValueVariableDriver<float>>();
                 DistanceDriver.VariableName.Value = "World/CullingDistance";
                 DistanceDriver.Target.Target = DistanceCheck.Distance;
+                DistanceDriver.DefaultValue.Value = 10.0F;
 
                 // Generates visuals for culled user's head and hands
 
