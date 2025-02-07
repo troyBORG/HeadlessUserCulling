@@ -100,7 +100,7 @@ public partial class HeadlessUserCulling : ResoniteMod
 
                 // Sets up dyn vars to be adjustable by the user
                 var DistanceDriver = DynVarSlot.AttachComponent<DynamicValueVariableDriver<float>>();
-                DistanceDriver.VariableName.Value = "HeadlessUserCulling/CullingDistance";
+                DistanceDriver.VariableName.Value = "World/CullingDistance";
                 DistanceDriver.Target.Target = DistanceCheck.Distance;
 
                 // Generates visuals for culled user's head and hands
