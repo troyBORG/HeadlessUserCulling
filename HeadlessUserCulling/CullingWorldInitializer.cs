@@ -16,7 +16,9 @@ public partial class HeadlessUserCulling : ResoniteMod
                 CullingRoot.ParentReference.DriveFromRef(CullingRoot.ParentReference, false, false, true);
                 CullingRoot.OrderOffset = long.MinValue;
                 Slot DynVarSlot = CullingRoot.AddSlot("DynVars", false);
+                Slot UsersSlot = CullingRoot.AddSlot("Users", false);
                 CullingRoot.Tag = "HeadlessCullingRoot";
+                UsersSlot.Tag = "HeadlessCullingUsers";
 
                 // Setup CullingDistance variable
                 Slot DistanceVarSlot = DynVarSlot.AddSlot("CullingDistance", false);

@@ -23,7 +23,8 @@ public partial class HeadlessUserCulling : ResoniteMod
                 // Create and setup user specific culling slots
                 Slot ThisUserRoot = user.Root.Slot;
                 Slot CullingRoot = user.World.RootSlot.GetChildrenWithTag("HeadlessCullingRoot").First();
-                Slot UserCullingSlot = CullingRoot.AddSlot(user.UserName, false);
+                Slot UsersRoot = CullingRoot.GetChildrenWithTag("HeadlessCullingUsers").First();
+                Slot UserCullingSlot = UsersRoot.AddSlot(user.UserName, false);
                 UserCullingSlot.Tag = null!;
                 Slot DistCheckSlot = UserCullingSlot.AddSlot("DistCheck", false);
                 Slot DynVarSlot = UserCullingSlot.AddSlot("DynVars", false);
