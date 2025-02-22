@@ -107,6 +107,12 @@ public partial class HeadlessUserCulling : ResoniteMod
                 DistanceDriver.Target.Target = DistanceCheck.Distance;
                 DistanceDriver.DefaultValue.Value = 10.0F;
 
+                var UserMuteState = DynVarSlot.AttachComponent<DynamicValueVariable<bool>>();
+                UserMuteState.VariableName.Value = "World/" + user.UserID + "-MuteState";
+
+                var UserMuteStateDriver = DynVarSlot.AttachComponent<DynamicValueVariableDriver<bool>>();
+                UserMuteStateDriver.VariableName.Value = "World/" + user.UserID + "-MuteState";
+
                 // Generates visuals for culled user's head and hands
 
                 // Gets the default pbs metallic to avoid duplicating materials
@@ -259,6 +265,11 @@ public partial class HeadlessUserCulling : ResoniteMod
                 // Sets the scale compensation to 1 to prevent the culled audio from breaking
                 ((Sync<float>)AudioManager.GetType().GetField("_scaleCompensation", BindingFlags.Instance | BindingFlags.NonPublic)!.GetValue(AudioManager)!).Value = 1.0F;
 
+                // Sets a BooleanValueDriver to allow silencing and dedicated muting to work
+                var BoolValueDriver = AudioSlot.AttachComponent<BooleanValueDriver<bool>>();
+                UserMuteStateDriver.Target.Target = BoolValueDriver.State;
+                BoolValueDriver.TargetField.Target = AudioSlot.ActiveSelf_Field;
+
                 // Sets up the audio slot to be disabled when the user is silenced
 
                 // User Input node
@@ -276,7 +287,7 @@ public partial class HeadlessUserCulling : ResoniteMod
                 // Value Field Drive<bool> node
                 var AudioSlotDrive = (ProtoFluxNode)ProtofluxSlot.AttachComponent(ProtoFluxHelper.GetDriverNode(typeof(bool)));
                 AudioSlotDrive.TryConnectInput(AudioSlotDrive.GetInput(0), NOT_Bool_2.GetOutput(0), false, false);
-                ((IDrive)AudioSlotDrive).TrySetRootTarget(AudioSlot.ActiveSelf_Field);
+                ((IDrive)AudioSlotDrive).TrySetRootTarget(BoolValueDriver.FalseValue);
 
                 // Causes the user's culled slots to regenerate if destroyed
                 UserCullingSlot.Destroyed += d => 
