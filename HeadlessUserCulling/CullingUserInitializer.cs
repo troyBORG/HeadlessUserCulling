@@ -28,6 +28,7 @@ public partial class HeadlessUserCulling : ResoniteMod
                 UserCullingSlot.Tag = null!;
                 Slot DistCheckSlot = UserCullingSlot.AddSlot("DistCheck", false);
                 Slot DynVarSlot = UserCullingSlot.AddSlot("DynVars", false);
+                DynVarSlot.Tag = user.UserID + "-DynVars";
                 Slot HelpersSlot = UserCullingSlot.AddSlot("Helpers", false);
                 Slot ProtofluxSlot = UserCullingSlot.AddSlot("<i><b>protoflu(x)", false);
 
