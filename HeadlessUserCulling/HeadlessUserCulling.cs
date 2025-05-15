@@ -7,7 +7,7 @@ public partial class HeadlessUserCulling : ResoniteMod
 {
     public override string Name => "HeadlessUserCulling";
     public override string Author => "Raidriar796";
-    public override string Version => "1.1.1";
+    public override string Version => "1.1.2";
     public override string Link => "https://github.com/Raidriar796/HeadlessUserCulling";
     public static ModConfiguration? Config;
 
@@ -16,7 +16,7 @@ public partial class HeadlessUserCulling : ResoniteMod
         Config = GetConfiguration();
         Config?.Save(true);
 
-        Engine.Current.RunPostInit(() => 
+        Engine.Current.RunPostInit(() =>
         {
             if (ModLoader.IsHeadless) Engine.Current.WorldManager.WorldAdded += InitializeWorld;
             else Msg("This mod is intended for headless clients only, please uninstall");
