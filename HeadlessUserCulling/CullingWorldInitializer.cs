@@ -7,7 +7,7 @@ public partial class HeadlessUserCulling : ResoniteMod
 {
     private static void InitializeWorld(World world)
     {
-        world.RunSynchronously(() => 
+        world.RunSynchronously(() =>
         {
             if (Config!.GetValue(Enable))
             {
@@ -39,7 +39,7 @@ public partial class HeadlessUserCulling : ResoniteMod
                 CullingRoot.Destroyed += d =>
                 {
                     world.UserSpawn -= InitializeUser;
-                    InitializeWorld(world); 
+                    InitializeWorld(world);
                 };
             }
         });

@@ -1,7 +1,5 @@
-using System.Runtime.CompilerServices;
 using Elements.Core;
 using FrooxEngine;
-using FrooxEngine.ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Users;
 using ResoniteModLoader;
 
 namespace HeadlessUserCulling;
@@ -81,7 +79,7 @@ public partial class HeadlessUserCulling : ResoniteMod
 
                     var UserMuteItemSource = MuteControlSlot.AttachComponent<ContextMenuItemSource>();
                     UserMuteItemSource.Label.Value = user.UserName;
-                    
+
                     var UserMuteButtonToggle = MuteControlSlot.AttachComponent<ButtonToggle>();
                     UserMuteButtonToggle.TargetValue.Target = UserDynVars.GetComponent<DynamicValueVariable<bool>>().Value;
                 }

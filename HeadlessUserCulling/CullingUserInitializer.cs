@@ -16,7 +16,7 @@ public partial class HeadlessUserCulling : ResoniteMod
 {
     private static void InitializeUser(User user)
     {
-        user.World.RunSynchronously(() => 
+        user.World.RunSynchronously(() =>
         {
             if (!user.IsDestroyed && !user.World.IsDestroyed && user != user.World.HostUser)
             {
@@ -54,7 +54,7 @@ public partial class HeadlessUserCulling : ResoniteMod
 
                 var CopyGlobalScale = UserCullingSlot.AttachComponent<CopyGlobalScale>();
                 CopyGlobalScale.Source.Target = ThisUserRoot;
-                
+
                 // Links the user active field to the distance component
                 // instead of writing it once to improve reliability,
                 // primarily for the user respawning.
@@ -62,7 +62,7 @@ public partial class HeadlessUserCulling : ResoniteMod
                 {
                     if (!ThisUserRoot.IsDestroyed && !DistanceCheck.IsDestroyed)
                     {
-                        var RefCast = DistCheckSlot.AttachComponent<ReferenceCast<Sync<bool>,IField<bool>>>();
+                        var RefCast = DistCheckSlot.AttachComponent<ReferenceCast<Sync<bool>, IField<bool>>>();
                         RefCast.Source.Target = ThisUserRoot.ActiveSelf_Field;
                         RefCast.Target.Target = DistanceCheck.TargetField;
                     }
@@ -71,7 +71,7 @@ public partial class HeadlessUserCulling : ResoniteMod
                 // Makes sure the helpers are only shown when the user's parents aren't disabled.
                 // If a slot the user is parented under is disabled, the helpers should also
                 // be disabled, this also improves compatibility with zone culling
-                
+
                 // ChangeableSource node
                 var ElementSource = (ProtoFluxNode)ProtofluxSlot.AttachComponent(ProtoFluxHelper.GetSourceNode(typeof(Slot)));
                 ((ISource)ElementSource).TrySetRootSource(ThisUserRoot);
@@ -117,7 +117,7 @@ public partial class HeadlessUserCulling : ResoniteMod
                 // Generates visuals for culled user's head and hands
 
                 // Gets the default pbs metallic to avoid duplicating materials
-                var DefaultMaterial = user.World.GetSharedComponentOrCreate("DefaultMaterial", delegate(PBS_Metallic mat) {});
+                var DefaultMaterial = user.World.GetSharedComponentOrCreate("DefaultMaterial", delegate (PBS_Metallic mat) { });
 
                 // This sets up the visuals and uses existing value streams from
                 // the user to drive the position and rotation of the culled visuals
@@ -178,7 +178,7 @@ public partial class HeadlessUserCulling : ResoniteMod
                     LeftHandPosDriver.ValueSource.Target = LeftHandPosStream;
                     LeftHandPosDriver.DriveTarget.Target = LeftHandVisualSlot.Position_Field;
                 }
-                
+
                 var LeftHandRotStream = user.GetStream<ValueStream<floatQ>>(s => s.Name == "LeftHand");
                 if (LeftHandRotStream != null)
                 {
@@ -284,18 +284,18 @@ public partial class HeadlessUserCulling : ResoniteMod
                 // NOT node
                 var NOT_Bool_2 = ProtofluxSlot.AttachComponent<NOT_Bool>();
                 NOT_Bool_2.TryConnectInput(NOT_Bool_2.GetInput(0), IsUserSilenced.GetOutput(0), false, false);
-                
+
                 // Value Field Drive<bool> node
                 var AudioSlotDrive = (ProtoFluxNode)ProtofluxSlot.AttachComponent(ProtoFluxHelper.GetDriverNode(typeof(bool)));
                 AudioSlotDrive.TryConnectInput(AudioSlotDrive.GetInput(0), NOT_Bool_2.GetOutput(0), false, false);
                 ((IDrive)AudioSlotDrive).TrySetRootTarget(BoolValueDriver.FalseValue);
 
                 // Causes the user's culled slots to regenerate if destroyed
-                UserCullingSlot.Destroyed += d => 
+                UserCullingSlot.Destroyed += d =>
                 {
                     if (!user.IsDestroyed)
                     {
-                        user.World.RunInUpdates(3, () => 
+                        user.World.RunInUpdates(3, () =>
                         {
                             if (!user.IsDestroyed && !ThisUserRoot.IsDestroyed) InitializeUser(user);
                         });
