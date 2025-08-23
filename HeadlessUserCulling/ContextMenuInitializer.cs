@@ -13,7 +13,6 @@ public partial class HeadlessUserCulling : ResoniteMod
         // Sets up context menu
         Slot RootMenuSlot = ThisUserRoot.AddSlot("HeadlessCullingContextMenu", false);
         Slot DistanceMenuSlot = RootMenuSlot.AddSlot("CullingDistance", false);
-        Slot MuteMenuSlot = RootMenuSlot.AddSlot("MuteSettings", false);
 
         Slot DistVarSlot = CullingRoot.GetChildrenWithTag("DistanceVar").First();
         if (!DistVarSlot.IsDestroyed)
@@ -48,42 +47,6 @@ public partial class HeadlessUserCulling : ResoniteMod
             ButtonCycle.Values.Add(10F);
             ButtonCycle.Values.Add(5F);
             ButtonCycle.Values.Add(2F);
-
-            // Mute Settings Submenu
-            var MuteItemSource = MuteMenuSlot.AttachComponent<ContextMenuItemSource>();
-            MuteItemSource.Label.Value = "Mute Culled User";
-            MuteItemSource.Color.Value = colorX.Red;
-
-            var MuteSubmenu = MuteMenuSlot.AttachComponent<ContextMenuSubmenu>();
-            MuteSubmenu.ItemsRoot.Target = MuteMenuSlot;
-            MuteSubmenu.Hidden.Value = true;
-
-            // Populate Mute Submenu per user
-            var UserList = user.World.AllUsers;
-            for (int i = 0; i < UserList.Count; i++)
-            {
-                if (UserList.ElementAt(i).HeadDevice != HeadOutputDevice.Headless && UserList.ElementAt(i) != user)
-                {
-                    CreateMuteButton(UserList.ElementAt(i));
-                }
-            }
-
-            user.World.UserJoined += CreateMuteButton;
-
-            void CreateMuteButton(User user)
-            {
-                Slot UserDynVars = CullingRoot.GetChildrenWithTag(user.UserID + "-DynVars").First();
-                if (!UserDynVars.IsDestroyed)
-                {
-                    Slot MuteControlSlot = MuteMenuSlot.AddSlot(user.UserID, false);
-
-                    var UserMuteItemSource = MuteControlSlot.AttachComponent<ContextMenuItemSource>();
-                    UserMuteItemSource.Label.Value = user.UserName;
-
-                    var UserMuteButtonToggle = MuteControlSlot.AttachComponent<ButtonToggle>();
-                    UserMuteButtonToggle.TargetValue.Target = UserDynVars.GetComponent<DynamicValueVariable<bool>>().Value;
-                }
-            }
         }
 
         // Sets up the context menu to destroy itself when
